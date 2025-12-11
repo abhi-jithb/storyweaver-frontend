@@ -82,11 +82,23 @@ class FilterEngine {
       languages: Array.from(new Set(books.map((b) => b.language)))
         .filter(Boolean)
         .sort(),
-      levels: Array.from(new Set(books.map((b) => b.level).filter(Boolean))).sort(),
+      levels: Array.from(
+        new Set(
+          books
+            .map((b) => b.level)
+            .filter((level): level is string => Boolean(level))
+        )
+      ).sort(),
       categories: Array.from(new Set(books.flatMap((b) => b.categories)))
         .filter(Boolean)
         .sort(),
-      publishers: Array.from(new Set(books.map((b) => b.publisher).filter(Boolean))).sort(),
+      publishers: Array.from(
+        new Set(
+          books
+            .map((b) => b.publisher)
+            .filter((publisher): publisher is string => Boolean(publisher))
+        )
+      ).sort(),
     };
   }
 }

@@ -1,130 +1,112 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Book, FilterState } from './types/opds';
-import { BookGrid } from './components/BookGrid';
-import { FilterSidebar } from './components/FilterSidebar';
+import { useBooks } from './hooks/useBooks';
+import { useFilters } from './hooks/useFilters';
 import { SearchBar } from './components/SearchBar';
-import { ErrorBoundary } from './components/ErrorBoundary';
-import { filterEngine } from './services/filterEngine';
-import { searchAlgorithm } from './services/searchAlgorithm';
-import './App.css';
+import { FilterSidebar } from './components/FilterSidebar';
+import { BookGrid } from './components/BookGrid';
+import { LoadingSpinner } from './components/LoadingSpinner';
+import { Footer } from './components/Footer';
+import { useState } from 'react';
 
 function App() {
-  const [books, setBooks] = useState<Book[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState<FilterState>({
-    languages: new Set(),
-    levels: new Set(),
-    categories: new Set(),
-    publishers: new Set(),
-    dateFilter: 'all',
-    searchQuery: ''
-  });
+  const { books, loading, error } = useBooks();
+  const {
+    filters,
+    updateLanguage,
+    updateLevel,
+    updateCategory,
+    updatePublisher,
+    updateDateFilter,
+    updateSearchQuery,
+    reset,
+    hasActiveFilters,
+  } = useFilters();
 
-  // Fetch books from API
-  useEffect(() => {
-    const fetchBooks = async () => {
-      try {
-        setLoading(true);
-        // Replace with your actual API endpoint
-        const response = await fetch('YOUR_API_ENDPOINT/books');
-        if (!response.ok) {
-          throw new Error('Failed to fetch books');
-        }
-        const data = await response.json();
-        setBooks(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        setLoading(false);
-      }
-    };
+  const [showFilters, setShowFilters] = useState(true);
 
-    fetchBooks();
-  }, []);
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
-  // Handle filter changes
-  const handleFilterChange = useCallback((newFilters: Partial<FilterState>) => {
-    setFilters(prev => ({
-      ...prev,
-      ...newFilters
-    }));
-  }, []);
-
-  // Handle search
-  const handleSearch = useCallback((query: string) => {
-    setFilters(prev => ({
-      ...prev,
-      searchQuery: query
-    }));
-  }, []);
-
-  // Reset all filters
-  const resetFilters = useCallback(() => {
-    setFilters({
-      languages: new Set(),
-      levels: new Set(),
-      categories: new Set(),
-      publishers: new Set(),
-      dateFilter: 'all',
-      searchQuery: ''
-    });
-  }, []);
-
-  if (loading) return <div className="p-4">Loading books...</div>;
-  if (error) return <div className="p-4 text-red-500">Error: {error}</div>;
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-red-50">
+        <div className="text-center max-w-md">
+          <h2 className="text-3xl font-bold text-red-600 mb-4">Error</h2>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors"
+          >
+             Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <ErrorBoundary>
-      <div className="min-h-screen bg-gray-50">
-        <header className="bg-white shadow-sm">
-          <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
-            <h1 className="text-2xl font-bold text-gray-900">StoryWeaver</h1>
-          </div>
-        </header>
-
-        <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-          <div className="mb-6">
-            <SearchBar onSearch={handleSearch} />
-          </div>
-
-          <div className="flex flex-col md:flex-row gap-6">
-            <div className="w-full md:w-64 flex-shrink-0">
-              <FilterSidebar
-                books={books}
-                filters={filters}
-                onLanguageChange={(lang) => handleFilterChange({
-                  languages: new Set(filters.languages).add(lang)
-                })}
-                onLevelChange={(level) => handleFilterChange({
-                  levels: new Set(filters.levels).add(level)
-                })}
-                onCategoryChange={(category) => handleFilterChange({
-                  categories: new Set(filters.categories).add(category)
-                })}
-                onPublisherChange={(publisher) => handleFilterChange({
-                  publishers: new Set(filters.publishers).add(publisher)
-                })}
-                onDateChange={(dateFilter) => handleFilterChange({ dateFilter })}
-                onReset={resetFilters}
-                hasActiveFilters={
-                  filters.languages.size > 0 ||
-                  filters.levels.size > 0 ||
-                  filters.categories.size > 0 ||
-                  filters.publishers.size > 0 ||
-                  filters.dateFilter !== 'all' ||
-                  !!filters.searchQuery
-                }
-              />
-            </div>
-
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          {/* Title Row */}
+          <div className="flex items-center justify-between mb-6">
             <div className="flex-1">
-              <BookGrid books={books} filters={filters} />
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
+                StoryWeaver OPDS
+              </h1>
+              <p className="text-gray-600 text-sm mt-1">
+                {books.length > 0
+                  ? `Discover ${books.length.toLocaleString()} stories in multiple languages`
+                  : 'Loading book catalog...'}
+              </p>
             </div>
+
+            {/* Mobile Filter Toggle */}
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="lg:hidden bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium"
+            >
+              {showFilters ? '✕ Hide' : '☰ Show'} Filters
+            </button>
           </div>
-        </main>
+
+          {/* Search Bar */}
+          <SearchBar onSearch={updateSearchQuery} />
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Sidebar Filters */}
+          {showFilters && (
+            <div className="lg:w-64 flex-shrink-0">
+              <div className="bg-white rounded-lg border border-gray-200">
+                <FilterSidebar
+                  books={books}
+                  filters={filters}
+                  onLanguageChange={updateLanguage}
+                  onLevelChange={updateLevel}
+                  onCategoryChange={updateCategory}
+                  onPublisherChange={updatePublisher}
+                  onDateChange={updateDateFilter}
+                  onReset={reset}
+                  hasActiveFilters={hasActiveFilters}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Book Grid */}
+          <div className="flex-1">
+            <BookGrid books={books} filters={filters} />
+          </div>
+        </div>
       </div>
-    </ErrorBoundary>
+
+      <Footer/>
+    </div>
   );
 }
 

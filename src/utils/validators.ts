@@ -24,13 +24,17 @@ export function validateAndSanitizeBook(book: any): Book {
     language: String(book.language || 'Unknown').slice(0, 50),
     level: book.level ? String(book.level).slice(0, 50) : undefined,
     categories: Array.isArray(book.categories) 
-      ? book.categories.map(c => String(c).slice(0, 50)).filter(Boolean)
+      ? book.categories
+          .map((c: unknown) => String(c).slice(0, 50))
+          .filter((c: unknown): c is string => Boolean(c))
       : [],
     publisher: book.publisher ? String(book.publisher).slice(0, 100) : undefined,
     publishedDate: book.publishedDate ? String(book.publishedDate).slice(0, 10) : undefined,
     rating: typeof book.rating === 'number' ? Math.min(5, Math.max(0, book.rating)) : undefined,
     tags: Array.isArray(book.tags)
-      ? book.tags.map(t => String(t).slice(0, 50)).filter(Boolean)
+      ? book.tags
+          .map((t: unknown) => String(t).slice(0, 50))
+          .filter((t: unknown): t is string => Boolean(t))
       : [],
   };
 }

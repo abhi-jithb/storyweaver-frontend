@@ -1,4 +1,6 @@
-export const OPDS_MAIN_URL = process.env.VITE_OPDS_URL || 
+// Vite exposes env vars on import.meta.env (process.env is undefined in the browser)
+export const OPDS_MAIN_URL =
+  import.meta.env.VITE_OPDS_URL ||
   'https://storage.googleapis.com/story-weaver-e2e-production/catalog/catalog.xml';
 
 export const CACHE_DURATION = 1 * 60 * 60 * 1000; // 1 hour in ms
