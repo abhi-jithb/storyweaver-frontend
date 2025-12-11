@@ -52,7 +52,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
     <aside className="w-full lg:w-64 bg-white p-4 border-r border-gray-200 h-auto lg:h-screen lg:overflow-y-auto">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg font-bold text-gray-900">🎯 Filters</h2>
+        <h2 className="text-lg font-bold text-gray-900"> Filters</h2>
         {hasActiveFilters && (
           <button
             onClick={onReset}
