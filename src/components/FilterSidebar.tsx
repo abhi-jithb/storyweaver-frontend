@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useMemo, useState, useDeferredValue } from 'react';
 import { Book, FilterState } from '../types/opds';
 import { filterEngine } from '../services/filterEngine';
 import { DATE_FILTER_OPTIONS } from '../utils/constants';
@@ -36,6 +36,24 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
     categories: true,
     publishers: false,
   });
+  const [languageSearch, setLanguageSearch] = useState('');
+  const [categorySearch, setCategorySearch] = useState('');
+  const deferredLanguageSearch = useDeferredValue(languageSearch);
+  const deferredCategorySearch = useDeferredValue(categorySearch);
+
+  const filteredLanguages = useMemo(() => {
+    const search = deferredLanguageSearch.toLowerCase();
+    return STORYWEAVER_LANGUAGES_LIST.filter((lang) => {
+      if (!lang.toLowerCase().includes(search)) return false;
+      // only show languages that exist in catalog
+      return options.languages.some((bookLang) => bookLang.toLowerCase() === lang.toLowerCase());
+    });
+  }, [deferredLanguageSearch, options.languages]);
+
+  const filteredCategories = useMemo(() => {
+    const search = deferredCategorySearch.toLowerCase();
+    return options.categories.filter((cat) => cat.toLowerCase().includes(search));
+  }, [deferredCategorySearch, options.categories]);
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections((prev) => ({
@@ -123,18 +141,17 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
 
       {/* Language Filter */}
       <FilterSection title="Language" icon="🗣" sectionKey="languages">
+        <input
+          type="text"
+          value={languageSearch}
+          onChange={(e) => setLanguageSearch(e.target.value)}
+          placeholder="Search language"
+          className="w-full mb-2 px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
         <div className="space-y-2 max-h-56 overflow-y-auto">
-          {STORYWEAVER_LANGUAGES_LIST.map((lang) => {
-            // Check if this language is in our books
-            const hasBooks = options.languages.some(
-              (bookLang) => bookLang.toLowerCase() === lang.toLowerCase()
-            );
-
-            if (!hasBooks) return null; // Don't show languages we don't have
-
+          {filteredLanguages.map((lang) => {
             const nativeName = getLanguageNativeName(lang);
-            const displayName =
-              nativeName !== lang ? `${lang} (${nativeName})` : lang;
+            const displayName = nativeName !== lang ? `${lang} (${nativeName})` : lang;
 
             return (
               <FilterCheckbox
@@ -181,8 +198,15 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
       {/* Category Filter */}
       {options.categories.length > 0 && (
         <FilterSection title="Categories" icon="🔍" sectionKey="categories">
+          <input
+            type="text"
+            value={categorySearch}
+            onChange={(e) => setCategorySearch(e.target.value)}
+            placeholder="Search category"
+            className="w-full mb-2 px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
           <div className="space-y-2 max-h-56 overflow-y-auto">
-            {options.categories.map((cat) => (
+            {filteredCategories.map((cat) => (
               <FilterCheckbox
                 key={cat}
                 label={cat}

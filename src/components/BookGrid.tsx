@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useDeferredValue } from 'react';
 import { Book, FilterState } from '../types/opds';
 import { BookCard } from './BookCard';
 import { searchAlgorithm } from '../services/searchAlgorithm';
@@ -12,17 +12,19 @@ interface BookGridProps {
 
 export const BookGrid: React.FC<BookGridProps> = ({ books, filters }) => {
   const [currentPage, setCurrentPage] = useState(1);
+  const deferredSearch = useDeferredValue(filters.searchQuery);
 
-const processedBooks = useMemo(() => {
-  let result = filterEngine.filterBooks(books, filters);
+  const processedBooks = useMemo(() => {
+    let result = filterEngine.filterBooks(books, filters);
 
-  if (filters.searchQuery.trim()) {
-    const searchResults = searchAlgorithm.search(result, filters.searchQuery);
-    result = searchResults.map((r) => r.book);
-  }
+    const searchTerm = deferredSearch.trim();
+    if (searchTerm.length >= 2) {
+      const searchResults = searchAlgorithm.search(result, searchTerm);
+      result = searchResults.map((r) => r.book);
+    }
 
-  return result;
-}, [books, filters]);
+    return result;
+  }, [books, filters, deferredSearch]);
 
   const totalPages = Math.ceil(processedBooks.length / PAGE_SIZE);
   const paginatedBooks = useMemo(() => {
