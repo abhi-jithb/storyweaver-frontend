@@ -48,11 +48,6 @@ export const BookGrid: React.FC<BookGridProps> = ({ books, filters }) => {
 
   return (
     <div className="flex-1">
-      {/* Results Count */}
-      <div className="text-sm text-gray-600 mb-4">
-        Showing {paginatedBooks.length} of {processedBooks.length} books
-      </div>
-
       {/* Book Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
         {paginatedBooks.map((book) => (

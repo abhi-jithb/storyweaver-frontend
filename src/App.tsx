@@ -8,7 +8,7 @@ import { Footer } from './components/Footer';
 import { useState } from 'react';
 
 function App() {
-  const { books, loading, error } = useBooks();
+  const { books, loading, loadingMore, error } = useBooks();
   const {
     filters,
     updateLanguage,
@@ -23,7 +23,8 @@ function App() {
 
   const [showFilters, setShowFilters] = useState(true);
 
-  if (loading) {
+  // Show loading spinner only on initial load (when no books yet)
+  if (loading && books.length === 0) {
     return <LoadingSpinner />;
   }
 

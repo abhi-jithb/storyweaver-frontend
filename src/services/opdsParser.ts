@@ -68,6 +68,115 @@ class OpdsParser {
     }
   }
 
+  /**
+   * Progressive loading: Loads initial batch immediately, then continues loading in background
+   * @param onProgress Callback fired when new books are loaded
+   * @param initialBatchSize Number of catalogs to load in initial batch
+   * @param batchSize Number of catalogs to load per subsequent batch
+   * @param batchDelay Delay between batches in milliseconds
+   */
+  async fetchBooksProgressive(
+    onProgress?: (books: Book[], isComplete: boolean) => void,
+    initialBatchSize: number = 8,
+    batchSize: number = 5,
+    batchDelay: number = 100
+  ): Promise<Book[]> {
+    // Check cache first
+    const cached = this.cache.get('all_books');
+    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+      console.log('Returning cached books');
+      if (onProgress) {
+        onProgress(cached.data, true);
+      }
+      return cached.data;
+    }
+
+    try {
+      console.log('Fetching OPDS catalog (progressive)...');
+      const mainRes = await fetch(OPDS_MAIN_URL);
+      
+      if (!mainRes.ok) {
+        throw new Error(`Failed to fetch main catalog: ${mainRes.status}`);
+      }
+
+      const mainXml = await mainRes.text();
+      const mainObj = this.xmlParser.parse(mainXml);
+
+      const links = this.extractCatalogLinks(mainObj.feed?.link || []);
+      console.log(`Found ${links.length} catalog links`);
+
+      const allBooks: Book[] = [];
+      const totalLinks = links.length;
+
+      // Load initial batch immediately
+      const initialLinks = links.slice(0, initialBatchSize);
+      console.log(`Loading initial batch of ${initialLinks.length} catalogs...`);
+
+      for (const langLink of initialLinks) {
+        try {
+          const booksInCatalog = await this.fetchCatalogBooks(langLink);
+          allBooks.push(...booksInCatalog);
+          if (onProgress) {
+            onProgress([...allBooks], false);
+          }
+        } catch (err) {
+          console.warn(`Failed to fetch books for ${langLink.title}:`, err);
+        }
+      }
+
+      console.log(`Initial batch loaded: ${allBooks.length} books`);
+
+      // Load remaining catalogs in batches
+      const remainingLinks = links.slice(initialBatchSize);
+      if (remainingLinks.length > 0) {
+        console.log(`Loading remaining ${remainingLinks.length} catalogs in background...`);
+        
+        for (let i = 0; i < remainingLinks.length; i += batchSize) {
+          const batch = remainingLinks.slice(i, i + batchSize);
+          
+          // Add delay between batches to prevent overwhelming the browser
+          if (i > 0) {
+            await new Promise(resolve => setTimeout(resolve, batchDelay));
+          }
+
+          // Load batch in parallel
+          const batchPromises = batch.map(async (langLink) => {
+            try {
+              return await this.fetchCatalogBooks(langLink);
+            } catch (err) {
+              console.warn(`Failed to fetch books for ${langLink.title}:`, err);
+              return [];
+            }
+          });
+
+          const batchResults = await Promise.all(batchPromises);
+          const newBooks = batchResults.flat();
+          allBooks.push(...newBooks);
+
+          if (onProgress) {
+            const isComplete = i + batchSize >= remainingLinks.length;
+            onProgress([...allBooks], isComplete);
+          }
+        }
+      }
+
+      // Cache the results
+      this.cache.set('all_books', {
+        data: allBooks,
+        timestamp: Date.now(),
+      });
+
+      console.log(`Loaded ${allBooks.length} books total`);
+      if (onProgress) {
+        onProgress([...allBooks], true);
+      }
+      return allBooks;
+    } catch (error) {
+      console.error('Error fetching OPDS catalog:', error);
+      throw new Error('Failed to load book catalog');
+    }
+  }
+
   private extractCatalogLinks(links: any[]): any[] {
     if (!Array.isArray(links)) {
       links = links ? [links] : [];
