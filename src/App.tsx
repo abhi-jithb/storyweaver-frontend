@@ -49,14 +49,14 @@ function App() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6">
           {/* Title Row */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex-1">
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
+          <div className="flex items-start justify-between mb-4 sm:mb-6 gap-3">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-900 leading-tight">
                 StoryWeaver OPDS
               </h1>
-              <p className="text-gray-600 text-sm mt-1">
+              <p className="text-gray-600 text-xs sm:text-sm mt-1">
                 {books.length > 0
                   ? `Discover ${books.length.toLocaleString()} stories in multiple languages`
                   : 'Loading book catalog...'}
@@ -66,9 +66,10 @@ function App() {
             {/* Mobile Filter Toggle */}
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="lg:hidden bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium"
+              className="lg:hidden bg-blue-600 text-white px-3 py-2 sm:px-4 rounded-lg hover:bg-blue-700 font-medium text-sm flex-shrink-0 min-h-[44px]"
+              aria-label={showFilters ? 'Hide filters' : 'Show filters'}
             >
-              {showFilters ? '✕ Hide' : '☰ Show'} Filters
+              {showFilters ? '✕' : '☰'}
             </button>
           </div>
 
@@ -78,29 +79,39 @@ function App() {
       </header>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar Filters */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6">
+        {/* Parent wrapper: flex flex-col md:flex-row */}
+        <div className="flex flex-col md:flex-row gap-4 sm:gap-6 items-start">
+          {/* Sidebar Filters - Modal overlay on mobile, sidebar on desktop */}
           {showFilters && (
-            <div className="lg:w-64 flex-shrink-0">
-              <div className="bg-white rounded-lg border border-gray-200">
-                <FilterSidebar
-                  books={books}
-                  filters={filters}
-                  onLanguageChange={updateLanguage}
-                  onLevelChange={updateLevel}
-                  onCategoryChange={updateCategory}
-                  onPublisherChange={updatePublisher}
-                  onDateChange={updateDateFilter}
-                  onReset={reset}
-                  hasActiveFilters={hasActiveFilters}
-                />
+            <>
+              {/* Mobile Overlay */}
+              <div 
+                className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+                onClick={() => setShowFilters(false)}
+              />
+              {/* Sidebar */}
+              <div className="w-full md:w-64 flex-shrink-0 lg:relative fixed lg:top-auto top-0 left-0 h-full lg:h-auto z-50 lg:z-auto max-w-sm lg:max-w-none">
+                <div className="bg-white rounded-lg lg:rounded-lg border border-gray-200 shadow-lg lg:shadow-none h-full lg:h-auto overflow-y-auto">
+                  <FilterSidebar
+                    books={books}
+                    filters={filters}
+                    onLanguageChange={updateLanguage}
+                    onLevelChange={updateLevel}
+                    onCategoryChange={updateCategory}
+                    onPublisherChange={updatePublisher}
+                    onDateChange={updateDateFilter}
+                    onReset={reset}
+                    hasActiveFilters={hasActiveFilters}
+                    onClose={() => setShowFilters(false)}
+                  />
+                </div>
               </div>
-            </div>
+            </>
           )}
 
-          {/* Book Grid */}
-          <div className="flex-1">
+          {/* Book Grid - flex-1 to fill remaining space */}
+          <div className="flex-1 min-w-0">
             <BookGrid books={books} filters={filters} />
           </div>
         </div>

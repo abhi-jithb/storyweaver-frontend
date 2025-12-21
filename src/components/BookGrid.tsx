@@ -47,9 +47,9 @@ export const BookGrid: React.FC<BookGridProps> = ({ books, filters }) => {
   }
 
   return (
-    <div className="flex-1">
-      {/* Book Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+    <div className="flex-1 flex flex-col h-full w-full">
+      {/* Responsive Book Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8 flex-1">
         {paginatedBooks.map((book) => (
           <BookCard key={book.id} book={book} />
         ))}
@@ -57,23 +57,23 @@ export const BookGrid: React.FC<BookGridProps> = ({ books, filters }) => {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-2">
+        <div className="flex justify-center items-center gap-2 flex-wrap">
           <button
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             disabled={currentPage === 1}
-            className="px-4 py-2 border border-gray-300 rounded disabled:opacity-50 hover:bg-gray-100"
+            className="px-3 sm:px-4 py-2.5 sm:py-2 border border-gray-300 rounded disabled:opacity-50 hover:bg-gray-100 text-sm min-h-[44px] sm:min-h-0"
           >
             ← Prev
           </button>
 
-          <div className="flex gap-1">
+          <div className="flex gap-1 sm:gap-1">
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
               const pageNum = currentPage > 3 ? currentPage - 2 + i : i + 1;
               return pageNum <= totalPages ? (
                 <button
                   key={pageNum}
                   onClick={() => setCurrentPage(pageNum)}
-                  className={`px-3 py-2 rounded ${
+                  className={`px-3 sm:px-3 py-2.5 sm:py-2 rounded text-sm min-h-[44px] sm:min-h-0 min-w-[44px] sm:min-w-0 ${
                     currentPage === pageNum
                       ? 'bg-blue-600 text-white'
                       : 'border border-gray-300 hover:bg-gray-100'
@@ -88,7 +88,7 @@ export const BookGrid: React.FC<BookGridProps> = ({ books, filters }) => {
           <button
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages}
-            className="px-4 py-2 border border-gray-300 rounded disabled:opacity-50 hover:bg-gray-100"
+            className="px-3 sm:px-4 py-2.5 sm:py-2 border border-gray-300 rounded disabled:opacity-50 hover:bg-gray-100 text-sm min-h-[44px] sm:min-h-0"
           >
             Next →
           </button>
