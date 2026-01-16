@@ -6,9 +6,12 @@ import { BookGrid } from './components/BookGrid';
 import { LoadingSpinner } from './components/LoadingSpinner';
 import { Footer } from './components/Footer';
 import { Hero } from './components/Hero';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { useState, useMemo } from 'react';
+import ErrorPage from './components/ErrorPage';
 
-function App() {
+function MainAppContent() {
   const { books, loading, loadingMore, error } = useBooks();
   const {
     filters,
@@ -90,17 +93,13 @@ function App() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-6 sm:py-8">
-        {/* Parent wrapper: flex flex-col md:flex-row */}
         <div className="flex flex-col md:flex-row gap-4 sm:gap-6 items-start">
-          {/* Sidebar Filters - Modal overlay on mobile, sidebar on desktop */}
           {showFilters && (
             <>
-              {/* Mobile Overlay */}
               <div
                 className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
                 onClick={() => setShowFilters(false)}
               />
-              {/* Sidebar */}
               <div className="w-full md:w-64 flex-shrink-0 lg:relative fixed lg:top-auto top-0 left-0 h-full lg:h-auto z-50 lg:z-auto max-w-sm lg:max-w-none">
                 <div className="bg-white rounded-2xl lg:rounded-2xl border border-gray-200 shadow-xl lg:shadow-lg h-full lg:h-auto overflow-y-auto custom-scrollbar">
                   <FilterSidebar
@@ -120,7 +119,6 @@ function App() {
             </>
           )}
 
-          {/* Book Grid - flex-1 to fill remaining space */}
           <div className="flex-1 min-w-0">
             <BookGrid books={books} filters={filters} />
           </div>
@@ -129,6 +127,29 @@ function App() {
 
       <Footer />
     </div>
+  );
+}
+
+function App() {
+  const router = createBrowserRouter([
+    {
+      path: "/",
+      element: <MainAppContent />,
+    },
+    {
+      path: "/search",
+      element: <MainAppContent />,
+    },
+    {
+      path: "*",
+      element: <ErrorPage />,
+    },
+  ]);
+
+  return (
+    <ErrorBoundary>
+      <RouterProvider router={router} />
+    </ErrorBoundary>
   );
 }
 
