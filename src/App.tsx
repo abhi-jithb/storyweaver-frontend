@@ -57,6 +57,19 @@ function MainAppContent() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-orange-50 to-cyan-50 animate-fadeIn">
+      {/* Mobile Filter Toggle - Fixed Top Right */}
+      <button
+        onClick={() => setShowFilters(!showFilters)}
+        className="lg:hidden fixed top-4 right-4 z-[100] bg-gradient-to-r from-primary-500 to-secondary-500 text-white p-3.5 rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 border-2 border-white/50 backdrop-blur-sm"
+        aria-label={showFilters ? 'Hide filters' : 'Show filters'}
+      >
+        {showFilters ? (
+          <svg className="w-6 h-6 font-bold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
+        ) : (
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M4 6h16M4 12h16m-7 6h7" /></svg>
+        )}
+      </button>
+
       {/* Hero Section */}
       <Hero bookCount={books.length} languageCount={languageCount} />
 
@@ -75,15 +88,6 @@ function MainAppContent() {
                   : 'Loading book catalog...'}
               </p>
             </div>
-
-            {/* Mobile Filter Toggle */}
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="lg:hidden bg-gradient-to-r from-primary-500 to-secondary-500 text-white px-4 py-3 rounded-xl hover:from-primary-600 hover:to-secondary-600 font-semibold text-sm flex-shrink-0 min-h-[44px] shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300"
-              aria-label={showFilters ? 'Hide filters' : 'Show filters'}
-            >
-              {showFilters ? '✕' : '☰'}
-            </button>
           </div>
 
           {/* Search Bar */}
