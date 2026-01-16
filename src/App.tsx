@@ -58,15 +58,15 @@ function App() {
       <Hero bookCount={books.length} languageCount={languageCount} />
 
       {/* Header */}
-      <header className="glass-white sticky top-0 z-40 shadow-lg border-b border-white/20">
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6">
+      <header className="glass-white shadow-lg border-b border-white/20">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-5 sm:py-7">
           {/* Title Row */}
-          <div className="flex items-start justify-between mb-4 sm:mb-6 gap-3">
+          <div className="flex items-start justify-between mb-5 sm:mb-7 gap-3">
             <div className="flex-1 min-w-0">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-display font-black gradient-text-purple leading-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-black gradient-text-purple leading-tight mb-2">
                 StoryWeaver OPDS
               </h1>
-              <p className="text-gray-600 text-sm sm:text-base mt-2 font-medium">
+              <p className="text-gray-700 text-base sm:text-lg mt-2 font-medium leading-relaxed">
                 {books.length > 0
                   ? `Discover ${books.length.toLocaleString()} stories in multiple languages`
                   : 'Loading book catalog...'}

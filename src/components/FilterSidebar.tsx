@@ -97,7 +97,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
     sectionKey,
   }: {
     title: string;
-    icon: string;
+    icon: React.ReactNode;
     children: React.ReactNode;
     sectionKey: keyof typeof expandedSections;
   }) => (
@@ -107,7 +107,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
         className="flex items-center justify-between w-full hover:text-blue-600 transition-colors mb-2 py-2 sm:py-1.5 flex-shrink-0 min-h-[44px] sm:min-h-0"
       >
         <h3 className="font-semibold text-gray-900 text-sm sm:text-base flex items-center gap-2">
-          <span className="text-base sm:text-lg">{icon}</span>
+          {icon}
           {title}
         </h3>
         <span
@@ -158,7 +158,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
       <div className="px-3 sm:px-4 py-4">
 
         {/* Language Filter - Takes significant space */}
-        <FilterSection title="Language" icon="🌐" sectionKey="languages">
+        <FilterSection title="Language" icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>} sectionKey="languages">
           <input
             type="text"
             value={languageSearch}
@@ -185,7 +185,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
 
         {/* Level Filter - UPDATED WITH OFFICIAL STORYWEAVER LEVELS */}
         {options.levels.length > 0 && (
-          <FilterSection title="Reading Level" icon="📚" sectionKey="levels">
+          <FilterSection title="Reading Level" icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>} sectionKey="levels">
             <div className="space-y-1 flex-shrink-0">
               {STORYWEAVER_LEVELS.map((level) => {
                 // Check if this level is in our books
@@ -215,7 +215,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
 
         {/* Category Filter - Takes remaining space */}
         {options.categories.length > 0 && (
-          <FilterSection title="Categories" icon="📂" sectionKey="categories">
+          <FilterSection title="Categories" icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>} sectionKey="categories">
             <input
               type="text"
               value={categorySearch}
@@ -239,7 +239,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
 
         {/* Publisher Filter */}
         {options.publishers.length > 0 && (
-          <FilterSection title="Publishers" icon="🏢" sectionKey="publishers">
+          <FilterSection title="Publishers" icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>} sectionKey="publishers">
             <div className="space-y-1 flex-shrink-0 max-h-32 overflow-y-auto custom-scrollbar">
               {options.publishers.slice(0, 10).map((pub) => (
                 <FilterCheckbox
@@ -261,7 +261,9 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
         {/* Date Filter */}
         <div className="mb-4 flex-shrink-0">
           <h3 className="font-semibold text-gray-900 mb-2 text-sm md:text-base flex items-center gap-2">
-            <span className="text-lg">📅</span>
+            <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
             Publication Date
           </h3>
           <select
@@ -291,7 +293,9 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
         {/* Info Box */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-800">
           <p className="font-semibold mb-1 flex items-center gap-1">
-            <span>💡</span>
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
             <span>Tip:</span>
           </p>
           <p>Click multiple filters to narrow down your search!</p>
