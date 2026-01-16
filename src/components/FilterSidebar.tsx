@@ -74,17 +74,16 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
     onChange: () => void;
     isCategory?: boolean;
   }) => (
-    <label className="flex items-center cursor-pointer group py-2 px-2 sm:py-1 rounded-md hover:bg-gray-50 transition-colors min-h-[44px] sm:min-h-0">
+    <label className="flex items-center cursor-pointer group py-2 px-3 sm:py-1.5 rounded-lg hover:bg-primary-50 transition-all duration-200 min-h-[44px] sm:min-h-0">
       <input
         type="checkbox"
         checked={checked}
         onChange={onChange}
-        className="w-5 h-5 sm:w-4 sm:h-4 text-blue-600 rounded cursor-pointer focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 flex-shrink-0"
+        className="w-5 h-5 sm:w-4 sm:h-4 text-primary-600 rounded cursor-pointer focus:ring-2 focus:ring-primary-500 focus:ring-offset-1 flex-shrink-0 accent-primary-600"
       />
       <span
-        className={`ml-2.5 sm:ml-2.5 text-sm group-hover:text-blue-600 transition-colors ${
-          checked ? 'text-blue-700 font-medium' : 'text-gray-700'
-        }`}
+        className={`ml-2.5 sm:ml-2.5 text-sm group-hover:text-primary-700 transition-colors ${checked ? 'text-primary-700 font-semibold' : 'text-gray-700'
+          }`}
       >
         {label}
       </span>
@@ -112,9 +111,8 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           {title}
         </h3>
         <span
-          className={`text-gray-500 text-sm sm:text-xs transition-transform duration-200 flex-shrink-0 ${
-            expandedSections[sectionKey] ? 'rotate-180' : ''
-          }`}
+          className={`text-gray-500 text-sm sm:text-xs transition-transform duration-200 flex-shrink-0 ${expandedSections[sectionKey] ? 'rotate-180' : ''
+            }`}
         >
           ▼
         </span>
@@ -126,16 +124,18 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   return (
     <aside className="w-full bg-white border-r border-gray-200 shadow-sm h-full lg:h-auto">
       {/* Header */}
-      <div className="flex justify-between items-center px-3 sm:px-4 pt-4 pb-3 border-b border-gray-200 bg-white sticky top-0 z-10">
-        <h2 className="text-base sm:text-lg font-bold text-gray-900 flex items-center gap-2">
-          <span className="text-lg sm:text-xl">🔍</span>
+      <div className="flex justify-between items-center px-4 sm:px-5 pt-5 pb-4 border-b border-gray-200 bg-gradient-to-r from-primary-50 to-secondary-50 sticky top-0 z-10">
+        <h2 className="text-base sm:text-lg font-black text-gray-900 flex items-center gap-2 font-display">
+          <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+          </svg>
           Filters
         </h2>
         <div className="flex items-center gap-2">
           {hasActiveFilters && (
             <button
               onClick={onReset}
-              className="text-xs bg-red-100 text-red-700 px-2 sm:px-3 py-1.5 rounded-md hover:bg-red-200 transition-colors font-medium min-h-[36px]"
+              className="text-xs bg-gradient-to-r from-red-500 to-red-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-semibold min-h-[36px] shadow-md hover:shadow-lg transform hover:scale-105"
             >
               Reset
             </button>
@@ -143,10 +143,12 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           {onClose && (
             <button
               onClick={onClose}
-              className="lg:hidden text-gray-500 hover:text-gray-700 p-2 min-h-[36px] min-w-[36px] flex items-center justify-center"
+              className="lg:hidden text-gray-500 hover:text-primary-600 p-2 min-h-[36px] min-w-[36px] flex items-center justify-center hover:bg-white rounded-lg transition-all"
               aria-label="Close filters"
             >
-              ✕
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </button>
           )}
         </div>
@@ -165,19 +167,19 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
             className="w-full mb-2 px-3 py-2.5 sm:py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors flex-shrink-0 min-h-[44px] sm:min-h-0"
           />
           <div className="space-y-1 max-h-64 overflow-y-auto custom-scrollbar">
-          {filteredLanguages.map((lang) => {
-            const nativeName = getLanguageNativeName(lang);
-            const displayName = nativeName !== lang ? `${lang} (${nativeName})` : lang;
+            {filteredLanguages.map((lang) => {
+              const nativeName = getLanguageNativeName(lang);
+              const displayName = nativeName !== lang ? `${lang} (${nativeName})` : lang;
 
-            return (
-              <FilterCheckbox
-                key={lang}
-                label={displayName}
-                checked={filters.languages.has(lang)}
-                onChange={() => onLanguageChange(lang)}
-              />
-            );
-          })}
+              return (
+                <FilterCheckbox
+                  key={lang}
+                  label={displayName}
+                  checked={filters.languages.has(lang)}
+                  onChange={() => onLanguageChange(lang)}
+                />
+              );
+            })}
           </div>
         </FilterSection>
 
@@ -185,23 +187,23 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
         {options.levels.length > 0 && (
           <FilterSection title="Reading Level" icon="📚" sectionKey="levels">
             <div className="space-y-1 flex-shrink-0">
-            {STORYWEAVER_LEVELS.map((level) => {
-              // Check if this level is in our books
-              const hasBooks = options.levels.some(
-                (bookLevel) => bookLevel.toLowerCase() === level.toLowerCase()
-              );
+              {STORYWEAVER_LEVELS.map((level) => {
+                // Check if this level is in our books
+                const hasBooks = options.levels.some(
+                  (bookLevel) => bookLevel.toLowerCase() === level.toLowerCase()
+                );
 
-              if (!hasBooks) return null; // Don't show levels we don't have
+                if (!hasBooks) return null; // Don't show levels we don't have
 
-              return (
-                <FilterCheckbox
-                  key={level}
-                  label={level}
-                  checked={filters.levels.has(level)}
-                  onChange={() => onLevelChange(level)}
-                />
-              );
-            })}
+                return (
+                  <FilterCheckbox
+                    key={level}
+                    label={level}
+                    checked={filters.levels.has(level)}
+                    onChange={() => onLevelChange(level)}
+                  />
+                );
+              })}
             </div>
             {options.levels.length === 0 && (
               <p className="text-xs text-gray-500 italic">
@@ -222,15 +224,15 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
               className="w-full mb-2 px-3 py-2.5 sm:py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors flex-shrink-0 min-h-[44px] sm:min-h-0"
             />
             <div className="space-y-1 max-h-64 overflow-y-auto custom-scrollbar">
-            {filteredCategories.map((cat) => (
-              <FilterCheckbox
-                key={cat}
-                label={cat}
-                checked={filters.categories.has(cat)}
-                onChange={() => onCategoryChange(cat)}
-                isCategory={true}
-              />
-            ))}
+              {filteredCategories.map((cat) => (
+                <FilterCheckbox
+                  key={cat}
+                  label={cat}
+                  checked={filters.categories.has(cat)}
+                  onChange={() => onCategoryChange(cat)}
+                  isCategory={true}
+                />
+              ))}
             </div>
           </FilterSection>
         )}
@@ -239,14 +241,14 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
         {options.publishers.length > 0 && (
           <FilterSection title="Publishers" icon="🏢" sectionKey="publishers">
             <div className="space-y-1 flex-shrink-0 max-h-32 overflow-y-auto custom-scrollbar">
-            {options.publishers.slice(0, 10).map((pub) => (
-              <FilterCheckbox
-                key={pub}
-                label={pub}
-                checked={filters.publishers.has(pub)}
-                onChange={() => onPublisherChange(pub)}
-              />
-            ))}
+              {options.publishers.slice(0, 10).map((pub) => (
+                <FilterCheckbox
+                  key={pub}
+                  label={pub}
+                  checked={filters.publishers.has(pub)}
+                  onChange={() => onPublisherChange(pub)}
+                />
+              ))}
             </div>
             {options.publishers.length > 10 && (
               <p className="text-xs text-gray-500 mt-2">
