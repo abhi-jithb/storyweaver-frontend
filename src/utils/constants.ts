@@ -16,6 +16,11 @@ export const SEARCH_WEIGHTS = {
 
 export const PAGE_SIZE = 20;
 
+// Progressive loading configuration
+export const INITIAL_CATALOGS_TO_LOAD = 8; // Load first 8 catalogs immediately
+export const CATALOGS_PER_BATCH = 5; // Load remaining catalogs in batches of 5
+export const BATCH_DELAY_MS = 100; // Delay between batches to prevent overwhelming the browser
+
 export const DATE_FILTER_OPTIONS = [
   { label: 'All Time', value: 'all' as const },
   { label: 'Newest First', value: 'newest' as const },
