@@ -6,9 +6,12 @@ import { BookGrid } from './components/BookGrid';
 import { LoadingSpinner } from './components/LoadingSpinner';
 import { Footer } from './components/Footer';
 import { Hero } from './components/Hero';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { useState, useMemo } from 'react';
+import ErrorPage from './components/ErrorPage';
 
-function App() {
+function MainAppContent() {
   const { books, loading, loadingMore, error } = useBooks();
   const {
     filters,
@@ -54,6 +57,19 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-orange-50 to-cyan-50 animate-fadeIn">
+      {/* Mobile Filter Toggle - Fixed Top Right */}
+      <button
+        onClick={() => setShowFilters(!showFilters)}
+        className="lg:hidden fixed top-4 right-4 z-[100] bg-gradient-to-r from-primary-500 to-secondary-500 text-white p-3.5 rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 border-2 border-white/50 backdrop-blur-sm"
+        aria-label={showFilters ? 'Hide filters' : 'Show filters'}
+      >
+        {showFilters ? (
+          <svg className="w-6 h-6 font-bold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
+        ) : (
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M4 6h16M4 12h16m-7 6h7" /></svg>
+        )}
+      </button>
+
       {/* Hero Section */}
       <Hero bookCount={books.length} languageCount={languageCount} />
 
@@ -72,15 +88,6 @@ function App() {
                   : 'Loading book catalog...'}
               </p>
             </div>
-
-            {/* Mobile Filter Toggle */}
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="lg:hidden bg-gradient-to-r from-primary-500 to-secondary-500 text-white px-4 py-3 rounded-xl hover:from-primary-600 hover:to-secondary-600 font-semibold text-sm flex-shrink-0 min-h-[44px] shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300"
-              aria-label={showFilters ? 'Hide filters' : 'Show filters'}
-            >
-              {showFilters ? '✕' : '☰'}
-            </button>
           </div>
 
           {/* Search Bar */}
@@ -90,17 +97,13 @@ function App() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-6 sm:py-8">
-        {/* Parent wrapper: flex flex-col md:flex-row */}
         <div className="flex flex-col md:flex-row gap-4 sm:gap-6 items-start">
-          {/* Sidebar Filters - Modal overlay on mobile, sidebar on desktop */}
           {showFilters && (
             <>
-              {/* Mobile Overlay */}
               <div
                 className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
                 onClick={() => setShowFilters(false)}
               />
-              {/* Sidebar */}
               <div className="w-full md:w-64 flex-shrink-0 lg:relative fixed lg:top-auto top-0 left-0 h-full lg:h-auto z-50 lg:z-auto max-w-sm lg:max-w-none">
                 <div className="bg-white rounded-2xl lg:rounded-2xl border border-gray-200 shadow-xl lg:shadow-lg h-full lg:h-auto overflow-y-auto custom-scrollbar">
                   <FilterSidebar
@@ -120,7 +123,6 @@ function App() {
             </>
           )}
 
-          {/* Book Grid - flex-1 to fill remaining space */}
           <div className="flex-1 min-w-0">
             <BookGrid books={books} filters={filters} />
           </div>
@@ -129,6 +131,29 @@ function App() {
 
       <Footer />
     </div>
+  );
+}
+
+function App() {
+  const router = createBrowserRouter([
+    {
+      path: "/",
+      element: <MainAppContent />,
+    },
+    {
+      path: "/search",
+      element: <MainAppContent />,
+    },
+    {
+      path: "*",
+      element: <ErrorPage />,
+    },
+  ]);
+
+  return (
+    <ErrorBoundary>
+      <RouterProvider router={router} />
+    </ErrorBoundary>
   );
 }
 
