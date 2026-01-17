@@ -7,12 +7,13 @@ import { LoadingSpinner } from './components/LoadingSpinner';
 import { Footer } from './components/Footer';
 import { Hero } from './components/Hero';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import { useState, useMemo } from 'react';
 import ErrorPage from './components/ErrorPage';
+import { BookDetails } from './components/BookDetails';
 
 function MainAppContent() {
-  const { books, loading, loadingMore, error } = useBooks();
+  const { books, loading, error } = useBooks();
   const {
     filters,
     updateLanguage,
@@ -140,6 +141,17 @@ function MainAppContent() {
   );
 }
 
+function PageLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-screen flex flex-col">
+      <div className="flex-1">
+        {children}
+      </div>
+      <Footer />
+    </div>
+  );
+}
+
 function App() {
   const router = createBrowserRouter([
     {
@@ -151,8 +163,16 @@ function App() {
       element: <MainAppContent />,
     },
     {
-      path: "*",
+      path: "/book/:bookId",
+      element: <PageLayout><BookDetails /></PageLayout>,
+    },
+    {
+      path: "/404",
       element: <ErrorPage />,
+    },
+    {
+      path: "*",
+      element: <Navigate to="/404" />,
     },
   ]);
 

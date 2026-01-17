@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Book } from '../types/opds';
 import { truncateText, formatDate } from '../utils/formatters';
 
@@ -9,7 +10,10 @@ interface BookCardProps {
 
 export const BookCard: React.FC<BookCardProps> = ({ book, score }) => {
   return (
-    <div className="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-500 flex flex-col h-full transform hover:scale-[1.03] hover:-translate-y-2 animate-fadeIn border border-gray-100">
+    <Link
+      to={`/book/${book.id}`}
+      className="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-500 flex flex-col h-full transform hover:scale-[1.03] hover:-translate-y-2 animate-fadeIn border border-gray-100 cursor-pointer"
+    >
       {/* Book Cover */}
       <div className="relative bg-gradient-to-br from-primary-100 via-secondary-100 to-accent-100 h-48 overflow-hidden">
         {book.cover ? (
@@ -24,7 +28,11 @@ export const BookCard: React.FC<BookCardProps> = ({ book, score }) => {
               }}
             />
             {/* Gradient Overlay on Hover */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
+              <span className="text-white text-xs font-black uppercase tracking-widest bg-primary-500/80 backdrop-blur-sm px-4 py-2 rounded-full transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 shadow-lg">
+                View Details
+              </span>
+            </div>
           </>
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-200 to-secondary-200 animate-pulse-slow">
@@ -66,14 +74,6 @@ export const BookCard: React.FC<BookCardProps> = ({ book, score }) => {
               <span>{book.level}</span>
             </div>
           )}
-          {book.publishedDate && (
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-secondary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <span>{formatDate(book.publishedDate)}</span>
-            </div>
-          )}
         </div>
 
         {/* Summary */}
@@ -81,54 +81,14 @@ export const BookCard: React.FC<BookCardProps> = ({ book, score }) => {
           {truncateText(book.summary, 100)}
         </p>
 
-        {/* Tags */}
-        {book.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3 sm:mb-4">
-            {book.tags.slice(0, 2).map((tag, index) => (
-              <span
-                key={tag}
-                className={`
-                  text-[10px] sm:text-xs px-2 sm:px-3 py-0.5 sm:py-1 rounded-full font-medium
-                  transition-all duration-300 hover:scale-105
-                  ${index === 0
-                    ? 'bg-gradient-to-r from-primary-100 to-primary-200 text-primary-700 hover:shadow-glow-sm'
-                    : 'bg-gradient-to-r from-accent-100 to-accent-200 text-accent-700 hover:shadow-cyan-glow'
-                  }
-                `}
-              >
-                {truncateText(tag, 15)}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {/* Download Button */}
-        {book.downloadLink && (
-          <a
-            href={book.downloadLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="
-              relative w-full 
-              bg-gradient-to-r from-primary-500 via-secondary-500 to-accent-500 
-              hover:from-primary-600 hover:via-secondary-600 hover:to-accent-600
-              text-white font-semibold py-2.5 sm:py-3 px-4 rounded-xl 
-              text-xs sm:text-sm transition-all duration-300 text-center
-              shadow-md hover:shadow-xl
-              transform hover:scale-[1.02]
-              overflow-hidden
-              group/btn
-            "
-          >
-            <span className="relative z-10 flex items-center justify-center gap-2">
-              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover/btn:animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-              Download
-            </span>
-          </a>
-        )}
+        {/* Action Indicator */}
+        <div className="mt-auto pt-2 border-t border-gray-50 flex items-center justify-between text-primary-600">
+          <span className="text-[10px] font-bold uppercase tracking-widest">Learn More</span>
+          <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
+        </div>
       </div>
-    </div>
+    </Link>
   );
 };
