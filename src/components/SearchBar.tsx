@@ -65,10 +65,10 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           autoComplete="off"
           inputMode="search"
           className={`
-            w-full pl-12 pr-12 py-4 
+            w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-3 sm:py-4 
             bg-white
-            rounded-2xl
-            text-base font-medium text-gray-900
+            rounded-xl sm:rounded-2xl
+            text-sm sm:text-base font-medium text-gray-900
             transition-all duration-300
             placeholder:text-gray-400
             outline-none

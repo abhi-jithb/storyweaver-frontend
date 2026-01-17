@@ -32,7 +32,7 @@ class OpdsParser {
     try {
       console.log('Fetching OPDS catalog...');
       const mainRes = await fetch(OPDS_MAIN_URL);
-      
+
       if (!mainRes.ok) {
         throw new Error(`Failed to fetch main catalog: ${mainRes.status}`);
       }
@@ -94,7 +94,7 @@ class OpdsParser {
     try {
       console.log('Fetching OPDS catalog (progressive)...');
       const mainRes = await fetch(OPDS_MAIN_URL);
-      
+
       if (!mainRes.ok) {
         throw new Error(`Failed to fetch main catalog: ${mainRes.status}`);
       }
@@ -130,10 +130,10 @@ class OpdsParser {
       const remainingLinks = links.slice(initialBatchSize);
       if (remainingLinks.length > 0) {
         console.log(`Loading remaining ${remainingLinks.length} catalogs in background...`);
-        
+
         for (let i = 0; i < remainingLinks.length; i += batchSize) {
           const batch = remainingLinks.slice(i, i + batchSize);
-          
+
           // Add delay between batches to prevent overwhelming the browser
           if (i > 0) {
             await new Promise(resolve => setTimeout(resolve, batchDelay));
@@ -214,11 +214,11 @@ class OpdsParser {
     const links = Array.isArray(entry.link)
       ? entry.link
       : entry.link
-      ? [entry.link]
-      : [];
+        ? [entry.link]
+        : [];
 
-    const publishedDate = entry.published
-      ? new Date(entry.published).toISOString().split('T')[0]
+    const publishedDate = (entry.published || entry.updated || entry['dcterms:issued'])
+      ? new Date(entry.published || entry.updated || entry['dcterms:issued']).toISOString().split('T')[0]
       : undefined;
 
     const book: Book = {
@@ -229,9 +229,9 @@ class OpdsParser {
       cover: links.find((l: any) => l.rel === 'http://opds-spec.org/image')?.href || '',
       downloadLink: links.find((l: any) => l.rel?.includes('acquisition'))?.href || '',
       language,
-      level: this.extractLevel(entry.category),
+      level: this.extractLevel(entry),
       categories: this.extractCategories(entry.category),
-      publisher: entry.publisher,
+      publisher: entry.publisher || entry['dcterms:publisher'] || entry['dc:publisher'],
       publishedDate,
       rating: this.extractRating(entry),
       tags: this.extractTags(entry.category),
@@ -249,22 +249,50 @@ class OpdsParser {
     return author?.name || 'Unknown';
   }
 
-  private extractLevel(categories: any): string | undefined {
+  private extractLevel(entry: any): string | undefined {
+    // 1. Try lrmi:educationalAlignment (common in StoryWeaver OPDS)
+    const eduAlign = entry['lrmi:educationalAlignment'] || entry['educationalAlignment'];
+    if (eduAlign) {
+      const term = eduAlign.targetName || eduAlign.term;
+      if (term) {
+        if (/^\d+$/.test(term)) return `Level ${term}`;
+        return term;
+      }
+    }
+
+    // 2. Try category tags
+    const categories = entry.category;
     const cats = Array.isArray(categories)
       ? categories
       : categories
-      ? [categories]
-      : [];
-    const levelCat = cats.find((c: any) => c?.scheme?.includes('level'));
-    return levelCat?.term;
+        ? [categories]
+        : [];
+
+    // Look for category with 'level' in scheme or label
+    const levelCat = cats.find((c: any) =>
+      c?.scheme?.toLowerCase()?.includes('level') ||
+      c?.label?.toLowerCase()?.includes('level') ||
+      c?.term?.toLowerCase()?.includes('level')
+    );
+
+    if (levelCat) {
+      const term = levelCat.label || levelCat.term;
+      if (term) {
+        // Ensure it starts with 'Level ' for consistency
+        if (/^\d+$/.test(term)) return `Level ${term}`;
+        return term;
+      }
+    }
+
+    return undefined;
   }
 
   private extractCategories(categories: any): string[] {
     const cats = Array.isArray(categories)
       ? categories
       : categories
-      ? [categories]
-      : [];
+        ? [categories]
+        : [];
     return cats
       .filter((c: any) => c?.term && !c?.scheme?.includes('level'))
       .map((c: any) => c.term)
