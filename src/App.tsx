@@ -158,15 +158,30 @@ function App() {
   const router = createBrowserRouter([
     {
       path: "/",
-      element: <MainAppContent />,
+      element: (
+        <>
+          <ScrollToTop /> {/* Reset scroll on home */}
+          <MainAppContent />
+        </>
+      ),
     },
     {
       path: "/search",
-      element: <MainAppContent />,
+      element: (
+        <>
+          <ScrollToTop />
+          <MainAppContent />
+        </>
+      ),
     },
     {
       path: "/book/:bookId",
-      element: <PageLayout><BookDetails /></PageLayout>,
+      element: (
+        <>
+          <ScrollToTop />
+          <PageLayout><BookDetails /></PageLayout>
+        </>
+      ),
     },
     {
       path: "/404",
@@ -183,7 +198,6 @@ function App() {
       <RouterProvider router={router} />
     </ErrorBoundary>
   );
-
 }
 
 export default App;
