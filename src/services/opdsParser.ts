@@ -217,8 +217,8 @@ class OpdsParser {
         ? [entry.link]
         : [];
 
-    const publishedDate = entry.published
-      ? new Date(entry.published).toISOString().split('T')[0]
+    const publishedDate = (entry.published || entry.updated || entry['dcterms:issued'])
+      ? new Date(entry.published || entry.updated || entry['dcterms:issued']).toISOString().split('T')[0]
       : undefined;
 
     const book: Book = {
@@ -229,9 +229,9 @@ class OpdsParser {
       cover: links.find((l: any) => l.rel === 'http://opds-spec.org/image')?.href || '',
       downloadLink: links.find((l: any) => l.rel?.includes('acquisition'))?.href || '',
       language,
-      level: this.extractLevel(entry.category),
+      level: this.extractLevel(entry),
       categories: this.extractCategories(entry.category),
-      publisher: entry.publisher,
+      publisher: entry.publisher || entry['dcterms:publisher'] || entry['dc:publisher'],
       publishedDate,
       rating: this.extractRating(entry),
       tags: this.extractTags(entry.category),
@@ -249,7 +249,19 @@ class OpdsParser {
     return author?.name || 'Unknown';
   }
 
-  private extractLevel(categories: any): string | undefined {
+  private extractLevel(entry: any): string | undefined {
+    // 1. Try lrmi:educationalAlignment (common in StoryWeaver OPDS)
+    const eduAlign = entry['lrmi:educationalAlignment'] || entry['educationalAlignment'];
+    if (eduAlign) {
+      const term = eduAlign.targetName || eduAlign.term;
+      if (term) {
+        if (/^\d+$/.test(term)) return `Level ${term}`;
+        return term;
+      }
+    }
+
+    // 2. Try category tags
+    const categories = entry.category;
     const cats = Array.isArray(categories)
       ? categories
       : categories
@@ -258,9 +270,9 @@ class OpdsParser {
 
     // Look for category with 'level' in scheme or label
     const levelCat = cats.find((c: any) =>
-      c?.scheme?.toLowerCase().includes('level') ||
-      c?.label?.toLowerCase().includes('level') ||
-      c?.term?.toLowerCase().includes('level')
+      c?.scheme?.toLowerCase()?.includes('level') ||
+      c?.label?.toLowerCase()?.includes('level') ||
+      c?.term?.toLowerCase()?.includes('level')
     );
 
     if (levelCat) {
