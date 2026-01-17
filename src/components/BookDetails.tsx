@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useBooks } from '../hooks/useBooks';
 import { LoadingSpinner } from './LoadingSpinner';
@@ -13,241 +13,150 @@ import {
     Share2,
     MoreHorizontal,
     Plus,
-    Eye,
     Heart,
-    ExternalLink,
-    ShieldCheck
+    Book as BookIcon,
+    ShieldCheck,
+    ExternalLink
 } from 'lucide-react';
 
 export const BookDetails: React.FC = () => {
     const { bookId } = useParams<{ bookId: string }>();
     const { books, loading } = useBooks();
 
-    const book = useMemo(() => {
-        return books.find((b) => b.id === bookId);
-    }, [books, bookId]);
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [bookId]);
 
+    const book = useMemo(() => books.find((b) => b.id === bookId), [books, bookId]);
+
+    const stats = useMemo(() => ({
+        likes: Math.floor(Math.random() * 5000 + 100).toLocaleString(),
+        views: Math.floor(Math.random() * 30000 + 500).toLocaleString()
+    }), []);
+
+    // SKELETON LOADING STATE
     if (loading && books.length === 0) {
-        return <LoadingSpinner />;
-    }
-
-    if (!book) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gray-50">
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">Book not found</h2>
-                <Link to="/" className="text-primary-600 hover:underline flex items-center gap-2">
-                    <Home size={18} /> Back to Home
-                </Link>
+            <div className="min-h-screen bg-white">
+                <div className="max-w-7xl mx-auto px-6 py-4 flex gap-2 animate-pulse">
+                    <div className="h-4 w-16 bg-gray-100 rounded-full" />
+                    <div className="h-4 w-4 bg-gray-50 rounded-full" />
+                    <div className="h-4 w-16 bg-gray-100 rounded-full" />
+                </div>
+                <main className="max-w-7xl mx-auto px-6 py-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                        <div className="lg:col-span-4 space-y-6 animate-pulse">
+                            <div className="w-full aspect-[3/4] bg-gray-200 rounded-2xl shadow-sm" />
+                            <div className="h-6 w-1/2 bg-gray-100 rounded mx-auto lg:mx-0" />
+                        </div>
+                        <div className="lg:col-span-8 space-y-8 animate-pulse">
+                            <div className="h-10 bg-gray-200 rounded-xl w-3/4" />
+                            <div className="h-32 bg-gray-50 rounded-xl w-full" />
+                        </div>
+                    </div>
+                </main>
             </div>
         );
     }
 
+    if (!book) return null;
+
     return (
-        <div className="min-h-screen bg-white">
-            {/* Breadcrumbs */}
-            <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center gap-2 text-sm text-gray-500 font-medium overflow-x-auto whitespace-nowrap">
-                <Link to="/" className="hover:text-primary-600 flex items-center gap-1">
-                    <Home size={16} /> Home
-                </Link>
-                <ChevronRight size={14} />
-                <Link to="/" className="hover:text-primary-600">Stories</Link>
-                <ChevronRight size={14} />
-                <span className="text-gray-900 truncate">{book.title}</span>
+        <div className="min-h-screen bg-white font-sans antialiased text-gray-800">
+            {/* Breadcrumbs - Matching Reference */}
+            <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center gap-2 text-sm text-primary-600 font-bold overflow-x-auto whitespace-nowrap">
+                <Link to="/" className="hover:text-primary-700 transition-colors">Home</Link>
+                <ChevronRight size={14} className="text-gray-300" />
+                <Link to="/" className="hover:text-primary-700">Stories</Link>
+                <ChevronRight size={14} className="text-gray-300" />
+                <span className="text-gray-400 truncate font-medium">{book.title}</span>
             </nav>
 
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16">
 
-                    {/* Left Column: Cover & Quick Stats */}
-                    <div className="lg:col-span-4 flex flex-col items-center lg:items-start gap-6">
-                        <div className="relative group w-full max-w-[320px] lg:max-w-none">
-                            <div className="aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl border border-gray-100 bg-gray-50">
-                                <img
-                                    src={book.cover}
-                                    alt={book.title}
-                                    className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-105"
-                                />
-
-                                {/* Level Overlay Badge */}
-                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 text-white">
-                                    <div className="bg-primary-500/90 backdrop-blur-md px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-black tracking-widest uppercase inline-block shadow-lg mb-2">
-                                        {book.language} - {book.level || 'Level 1'}
-                                    </div>
-                                    <h3 className="text-lg font-bold leading-tight line-clamp-2">{book.title}</h3>
-                                    <div className="flex items-center gap-2 mt-2">
-                                        <ShieldCheck size={14} className="text-green-400" />
-                                        <span className="text-[10px] font-bold tracking-wider uppercase opacity-90">Verified</span>
-                                    </div>
-                                </div>
+                    {/* Left: Reference-Style Book Card */}
+                    <div className="lg:col-span-4 flex flex-col items-center lg:items-start gap-4">
+                        <div className="w-full max-w-[320px] bg-white border border-gray-100 rounded-2xl shadow-xl overflow-hidden group">
+                            <div className="relative aspect-[3/4] overflow-hidden">
+                                <img src={book.cover} alt={book.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                             </div>
-
-                            {/* Engagement Stats Overlay (Simulated) */}
-                            <div className="flex justify-center gap-8 mt-6 text-gray-500 font-bold text-sm">
-                                <div className="flex items-center gap-2">
-                                    <Heart size={20} className="text-red-500 fill-red-500" />
-                                    <span>{(Math.random() * 5000 + 100).toFixed(0)}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Eye size={20} className="text-blue-500" />
-                                    <span>{(Math.random() * 30000 + 500).toFixed(0)}</span>
+                            <div className="bg-primary-600 text-white px-3 py-2 text-[10px] font-black uppercase tracking-widest flex items-center justify-between">
+                                <span>{book.language}</span>
+                                {book.level && <span>• {book.level}</span>}
+                            </div>
+                            <div className="p-4 space-y-1">
+                                <h3 className="font-bold text-gray-900 leading-tight">{book.title}</h3>
+                                <p className="text-sm text-gray-500">{book.author}</p>
+                                <div className="flex items-center gap-1.5 text-primary-600 text-[10px] font-black uppercase mt-2">
+                                    <ShieldCheck size={14} className="text-green-500" /> Verified
                                 </div>
                             </div>
                         </div>
-
-                        {/* Quick Interaction Icons */}
-                        <div className="flex items-center gap-4 w-full justify-center lg:justify-start">
-                            <button className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors text-sm font-bold">
-                                <Plus size={18} /> My Bookshelf
-                            </button>
-                            <button className="p-2 rounded-full border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors">
-                                <Share2 size={18} />
-                            </button>
-                            <button className="p-2 rounded-full border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors">
-                                <MoreHorizontal size={18} />
-                            </button>
+                        <div className="flex justify-center gap-8 mt-2 text-gray-400 font-bold text-sm">
+                            <span className="flex items-center gap-2"><Heart size={18} className="text-red-500 fill-red-500" /> {stats.likes}</span>
+                            <span className="flex items-center gap-2"><BookIcon size={18} /> {stats.views}</span>
                         </div>
                     </div>
 
-                    {/* Right Column: Metadata & Actions */}
+                    {/* Right: Info Area with Correct Font Sizing */}
                     <div className="lg:col-span-8 space-y-8">
-                        <div className="space-y-4">
-                            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 leading-tight">
-                                {book.title}
-                            </h1>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            <div className="md:col-span-2 space-y-6">
+                                <h1 className="text-3xl lg:text-4xl font-bold text-gray-900">{book.title}</h1>
 
-                            <div className="space-y-2 text-base sm:text-lg">
-                                <p className="text-gray-600">
-                                    Written by <span className="text-primary-600 font-bold hover:underline cursor-pointer">{book.author}</span>
-                                </p>
-                                <p className="text-gray-600">
-                                    Illustrated by <span className="text-secondary-600 font-bold hover:underline cursor-pointer">{book.author}</span>
-                                </p>
-                                {book.publisher && (
-                                    <p className="text-gray-600">
-                                        Published By <span className="text-accent-600 font-bold hover:underline cursor-pointer">{book.publisher}</span>
-                                    </p>
-                                )}
-                            </div>
-                        </div>
+                                <div className="space-y-1 text-sm md:text-base">
+                                    <p className="text-gray-500">Written by <span className="text-primary-600 font-bold hover:underline cursor-pointer">{book.author}</span></p>
+                                    <p className="text-gray-500">Illustrated by <span className="text-secondary-600 font-bold hover:underline cursor-pointer">{book.author}</span></p>
+                                    <p className="text-gray-500">Published By <span className="text-indigo-600 font-bold cursor-pointer">{book.publisher || 'Pratham Books'}</span></p>
+                                </div>
 
-                        <hr className="border-gray-100" />
+                                <div className="flex items-center gap-6 pt-2 border-t border-gray-100">
+                                    <button className="flex items-center gap-2 text-primary-600 text-sm font-bold hover:underline">
+                                        <Plus size={18} /> My Bookshelf
+                                    </button>
+                                    <button className="flex items-center gap-2 text-primary-600 text-sm font-bold hover:underline">
+                                        <Share2 size={18} /> Share
+                                    </button>
+                                    <button className="text-gray-300 hover:text-primary-600"><MoreHorizontal size={18} /></button>
+                                </div>
 
-                        {/* CTA Buttons */}
-                        <div className="flex flex-col sm:flex-row gap-8">
-                            <div className="flex-1 space-y-4">
-                                <button
-                                    className="w-full bg-primary-600 hover:bg-primary-700 text-white font-black py-4 px-8 rounded-xl text-xl shadow-xl shadow-primary-500/20 transform hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3"
-                                    onClick={() => window.open(book.downloadLink, '_blank')}
-                                >
-                                    <BookOpen size={24} />
-                                    Read Story
-                                </button>
-                                <button className="w-full bg-white border-2 border-primary-600 text-primary-600 hover:bg-primary-50 font-black py-4 px-8 rounded-xl text-xl transform hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3">
-                                    <Volume2 size={24} />
-                                    Readalong
-                                </button>
-
-                                <div className="pt-6">
-                                    <h4 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">Summary</h4>
-                                    <p className="text-gray-700 text-lg leading-relaxed">
+                                {/* Summary: Proper Font Sizing */}
+                                <div className="pt-4 border-t border-gray-100">
+                                    <p className="text-gray-700 text-sm md:text-base leading-relaxed">
                                         {book.summary}
                                     </p>
                                 </div>
                             </div>
 
-                            {/* Vertical Sidebar Actions */}
-                            <div className="w-full sm:w-64 space-y-2 border-l border-gray-100 sm:pl-8">
-                                <button className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-all text-sm font-bold">
-                                    <Save size={18} className="text-primary-500" />
-                                    Save to Offline Library
+                            {/* Sidebar Actions */}
+                            <div className="space-y-4">
+                                <button className="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-primary-500/25 transition-all active:scale-95 text-lg">
+                                    Read Story
                                 </button>
-                                <button className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-all text-sm font-bold">
-                                    <Languages size={18} className="text-secondary-500" />
-                                    Translate this Story
-                                </button>
-                                <button className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-all text-sm font-bold">
-                                    <Languages size={18} className="text-accent-500" />
-                                    Translate Offline
-                                </button>
-                                <a
-                                    href={book.downloadLink}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-all text-sm font-bold"
-                                >
-                                    <Download size={18} className="text-green-500" />
-                                    Download
-                                </a>
+                                <div className="flex flex-col gap-4 pt-4">
+                                    <SidebarLink icon={<Save size={20} />} label="Save to Offline Library" color="text-primary-500" />
+                                    <SidebarLink icon={<Languages size={20} />} label="Translate this Story" color="text-secondary-500" />
+                                    <SidebarLink icon={<Languages size={20} />} label="Translate Offline" color="text-indigo-500" />
+                                    <SidebarLink icon={<Download size={20} />} label="Download" color="text-green-500" />
+                                </div>
                             </div>
                         </div>
 
-                        {/* Versions & Tags */}
-                        <div className="pt-12 space-y-12">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 flex items-center justify-between group cursor-pointer hover:border-primary-300 transition-all">
-                                    <div>
-                                        <h4 className="text-lg font-black text-gray-900 line-clamp-1">55 versions available in 49 languages</h4>
-                                        <p className="text-sm text-gray-500 mt-1 font-medium">Explore alternative translations</p>
-                                    </div>
-                                    <ChevronRight size={20} className="text-gray-300 group-hover:text-primary-500 transition-colors" />
-                                </div>
-                                <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 flex items-center justify-between group cursor-pointer hover:border-secondary-300 transition-all">
-                                    <div>
-                                        <h4 className="text-lg font-black text-gray-900 line-clamp-1">This story is a part of 1 Reading List</h4>
-                                        <p className="text-sm text-gray-500 mt-1 font-medium">Discover related collections</p>
-                                    </div>
-                                    <ChevronRight size={20} className="text-gray-300 group-hover:text-secondary-500 transition-colors" />
-                                </div>
-                            </div>
+                        {/* Versions Bar */}
+                        <div className="w-full bg-gray-50 rounded-xl border border-gray-100 py-4 px-6 text-center font-bold text-gray-600 text-sm">
+                            7 versions available in 7 languages
+                        </div>
 
-                            {/* Similar Themes */}
-                            <div className="space-y-6">
-                                <h3 className="text-2xl font-black text-gray-900 text-center lg:text-left">Explore similar themes</h3>
-                                <div className="flex flex-wrap gap-3 justify-center lg:justify-start">
-                                    {book.tags.length > 0 ? book.tags.map(tag => (
-                                        <span
-                                            key={tag}
-                                            className="px-6 py-2 bg-blue-50 text-blue-700 rounded-full text-xs font-black uppercase tracking-widest hover:bg-blue-100 transition-colors cursor-pointer border border-blue-100"
-                                        >
-                                            {tag}
-                                        </span>
-                                    )) : (
-                                        ['TASTE', 'CURIOUS', 'ASK', 'QUESTIONS', 'OBSERVATION', 'LEARN', 'CHILDHOOD'].map(tag => (
-                                            <span
-                                                key={tag}
-                                                className="px-6 py-2 bg-blue-50 text-blue-700 rounded-full text-xs font-black uppercase tracking-widest hover:bg-blue-100 transition-colors cursor-pointer border border-blue-100"
-                                            >
-                                                {tag}
-                                            </span>
-                                        ))
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Footer Branding */}
-                            <div className="flex flex-col md:flex-row items-center justify-between gap-12 pt-12 border-t border-gray-100">
-                                <div className="text-center md:text-left">
-                                    <h4 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">Published By</h4>
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center p-2">
-                                            {/* Placeholder for Pratham Logo */}
-                                            <BookOpen size={32} className="text-primary-500" />
-                                        </div>
-                                        <div>
-                                            <h4 className="text-xl font-black text-gray-900">{book.publisher || 'Pratham Books'}</h4>
-                                            <p className="text-sm text-gray-500 font-medium flex items-center gap-1">
-                                                www.prathambooks.org <ExternalLink size={12} />
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="max-w-md text-center md:text-right">
-                                    <h4 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">Supported By</h4>
-                                    <p className="text-sm text-gray-600 font-medium leading-relaxed italic">
-                                        "{book.title}" has been published on StoryWeaver by Pratham Books. The development of this book was supported by various contributors and partners.
-                                    </p>
-                                </div>
+                        {/* Similar Themes */}
+                        <div className="space-y-6 pt-4 text-center lg:text-left">
+                            <h3 className="text-xl font-bold text-gray-900">Explore similar themes</h3>
+                            <div className="flex flex-wrap justify-center lg:justify-start gap-2">
+                                {['FAMILY', 'GIFT', 'SWEET', 'FOOD', 'SPICY', 'CANDY'].map(tag => (
+                                    <span key={tag} className="px-5 py-2 bg-primary-50 text-primary-600 rounded-full text-[11px] font-black tracking-widest hover:bg-primary-100 transition-colors cursor-pointer border border-primary-100">
+                                        {tag}
+                                    </span>
+                                ))}
                             </div>
                         </div>
                     </div>
@@ -256,3 +165,10 @@ export const BookDetails: React.FC = () => {
         </div>
     );
 };
+
+const SidebarLink = ({ icon, label, color }: { icon: any, label: string, color: string }) => (
+    <button className="flex items-center gap-3 text-primary-600 hover:text-primary-700 transition-colors font-bold text-sm text-left">
+        <span className={`${color} flex-shrink-0`}>{icon}</span>
+        {label}
+    </button>
+);

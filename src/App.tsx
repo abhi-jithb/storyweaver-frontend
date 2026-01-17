@@ -11,6 +11,8 @@ import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 import { useState, useMemo } from 'react';
 import ErrorPage from './components/ErrorPage';
 import { BookDetails } from './components/BookDetails';
+import { BrowserRouter as Router } from 'react-router-dom';
+import ScrollToTop from './components/ScrollToTop';
 
 function MainAppContent() {
   const { books, loading, error } = useBooks();
@@ -181,6 +183,7 @@ function App() {
       <RouterProvider router={router} />
     </ErrorBoundary>
   );
+
 }
 
 export default App;
