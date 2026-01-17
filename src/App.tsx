@@ -25,7 +25,7 @@ function MainAppContent() {
     hasActiveFilters,
   } = useFilters();
 
-  const [showFilters, setShowFilters] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
 
   // Calculate unique languages for Hero stats
   const languageCount = useMemo(() => {
@@ -98,30 +98,36 @@ function MainAppContent() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-6 sm:py-8">
         <div className="flex flex-col md:flex-row gap-4 sm:gap-6 items-start">
-          {showFilters && (
-            <>
-              <div
-                className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
-                onClick={() => setShowFilters(false)}
+          {/* Filters - Always visible on desktop, togglable on mobile */}
+          <div
+            className={`
+              ${showFilters ? 'fixed inset-0 bg-black/50 z-40 lg:hidden' : 'hidden'}
+            `}
+            onClick={() => setShowFilters(false)}
+          />
+
+          <div className={`
+            w-full lg:w-72 flex-shrink-0 
+            lg:relative fixed lg:top-auto top-0 left-0 h-full lg:h-auto z-50 lg:z-auto 
+            max-w-sm lg:max-w-none transform transition-transform duration-300 ease-in-out
+            ${showFilters ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+            ${!showFilters ? 'hidden lg:block' : 'block'}
+          `}>
+            <div className="bg-white rounded-r-2xl lg:rounded-2xl border-r lg:border border-gray-200 shadow-2xl lg:shadow-lg h-full lg:h-auto overflow-y-auto custom-scrollbar">
+              <FilterSidebar
+                books={books}
+                filters={filters}
+                onLanguageChange={updateLanguage}
+                onLevelChange={updateLevel}
+                onCategoryChange={updateCategory}
+                onPublisherChange={updatePublisher}
+                onDateChange={updateDateFilter}
+                onReset={reset}
+                hasActiveFilters={hasActiveFilters}
+                onClose={() => setShowFilters(false)}
               />
-              <div className="w-full md:w-64 flex-shrink-0 lg:relative fixed lg:top-auto top-0 left-0 h-full lg:h-auto z-50 lg:z-auto max-w-sm lg:max-w-none">
-                <div className="bg-white rounded-2xl lg:rounded-2xl border border-gray-200 shadow-xl lg:shadow-lg h-full lg:h-auto overflow-y-auto custom-scrollbar">
-                  <FilterSidebar
-                    books={books}
-                    filters={filters}
-                    onLanguageChange={updateLanguage}
-                    onLevelChange={updateLevel}
-                    onCategoryChange={updateCategory}
-                    onPublisherChange={updatePublisher}
-                    onDateChange={updateDateFilter}
-                    onReset={reset}
-                    hasActiveFilters={hasActiveFilters}
-                    onClose={() => setShowFilters(false)}
-                  />
-                </div>
-              </div>
-            </>
-          )}
+            </div>
+          </div>
 
           <div className="flex-1 min-w-0">
             <BookGrid books={books} filters={filters} />
