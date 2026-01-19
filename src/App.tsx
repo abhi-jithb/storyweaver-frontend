@@ -19,7 +19,7 @@ import { CartSidebar } from './components/CartSidebar';
 import { SuccessModal } from './components/SuccessModal';
 
 function MainAppContent() {
-  const { books, loading, error } = useBooks();
+  const { books, loading, error, filterOptions } = useBooks(); // Task 1 & 2: Get dynamic options
   const {
     filters,
     updateLanguage,
@@ -133,7 +133,7 @@ function MainAppContent() {
           `}>
             <div className="bg-white rounded-r-2xl lg:rounded-2xl border-r lg:border border-gray-200 shadow-2xl lg:shadow-lg h-full lg:h-auto overflow-y-auto custom-scrollbar">
               <FilterSidebar
-                books={books}
+                filterOptions={filterOptions} // Task 2: Pass dynamic options
                 filters={filters}
                 onLanguageChange={updateLanguage}
                 onLevelChange={updateLevel}

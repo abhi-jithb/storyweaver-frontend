@@ -1,9 +1,8 @@
 
 import React, { useMemo, useState, useDeferredValue, memo } from 'react';
-import { Book, FilterState } from '../types/opds';
-import { filterEngine } from '../services/filterEngine';
+import { FilterState, FilterOptions } from '../types/opds';
 import { DATE_FILTER_OPTIONS } from '../utils/constants';
-import { STORYWEAVER_LANGUAGES_LIST, getLanguageNativeName } from '../utils/storyWeaverLanguages';
+import { getLanguageNativeName } from '../utils/storyWeaverLanguages';
 import { STORYWEAVER_LEVELS } from '../utils/storyWeaverCategories';
 
 // --- Shared Components Moved Outside (Prevents Re-mounting) ---
@@ -74,8 +73,9 @@ const FilterSection = memo(({
 
 FilterSection.displayName = 'FilterSection';
 
+
 interface FilterSidebarProps {
-  books: Book[];
+  filterOptions: FilterOptions; // Task 2: Dynamic options prop
   filters: FilterState;
   onLanguageChange: (language: string) => void;
   onLevelChange: (level: string) => void;
@@ -88,7 +88,7 @@ interface FilterSidebarProps {
 }
 
 export const FilterSidebar: React.FC<FilterSidebarProps> = ({
-  books,
+  filterOptions: options, // Rename to options for easier usage
   filters,
   onLanguageChange,
   onLevelChange,
@@ -99,8 +99,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   hasActiveFilters,
   onClose,
 }) => {
-  // Memoize options to avoid expensive recalcs on every search keystroke
-  const options = useMemo(() => filterEngine.getFilterOptions(books), [books]);
+  // Removed internal filterEngine.getFilterOptions call - using passed prop
 
   const [expandedSections, setExpandedSections] = useState({
     languages: true,
@@ -117,10 +116,11 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
 
   const filteredLanguages = useMemo(() => {
     const search = deferredLanguageSearch.toLowerCase();
-    return STORYWEAVER_LANGUAGES_LIST.filter((lang) =>
+    // Task 2: Use dynamic options.languages instead of static list
+    return options.languages.filter((lang) =>
       lang.toLowerCase().includes(search)
     );
-  }, [deferredLanguageSearch]);
+  }, [deferredLanguageSearch, options.languages]);
 
   const filteredCategories = useMemo(() => {
     const search = deferredCategorySearch.toLowerCase();
