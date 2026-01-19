@@ -10,7 +10,6 @@ class FilterEngine {
     const hasLang = filters.languages.size > 0;
     const hasLevel = filters.levels.size > 0;
     const hasCat = filters.categories.size > 0;
-    const hasPub = filters.publishers.size > 0;
     const hasDate = filters.dateFilter !== 'all' && filters.dateFilter !== 'newest' && filters.dateFilter !== 'oldest';
 
     const filtered = books.filter(
@@ -18,7 +17,6 @@ class FilterEngine {
         (!hasLang || this.matchLanguage(book, filters)) &&
         (!hasLevel || this.matchLevel(book, filters)) &&
         (!hasCat || this.matchCategories(book, filters)) &&
-        (!hasPub || this.matchPublisher(book, filters)) &&
         (!hasDate || this.matchDate(book, filters))
     );
 
@@ -33,6 +31,7 @@ class FilterEngine {
 
   private matchLevel(book: Book, filters: FilterState): boolean {
     if (!book.level) return false;
+    // Task 3: Check against strict levels (Level 1-4)
     if (filters.levels.has(book.level)) return true;
     const mappedLevel = this.mapLevelToStoryWeaver(book.level);
     return !!(mappedLevel && filters.levels.has(mappedLevel));
@@ -44,10 +43,6 @@ class FilterEngine {
       const mappedCategory = mapCategoryToStoryWeaver(cat);
       return !!(mappedCategory && filters.categories.has(mappedCategory));
     });
-  }
-
-  private matchPublisher(book: Book, filters: FilterState): boolean {
-    return book.publisher ? filters.publishers.has(book.publisher) : false;
   }
 
   private matchDate(book: Book, filters: FilterState): boolean {
@@ -78,22 +73,23 @@ class FilterEngine {
     }
 
     const normalized = level.toLowerCase().trim();
+    // Task 3: Strict Levels 1-4
     const levelMap: Record<string, string> = {
-      'level 1': 'Level 1: Foundations',
-      'level1': 'Level 1: Foundations',
-      'foundations': 'Level 1: Foundations',
-      'beginner': 'Level 1: Foundations',
-      'level 2': 'Level 2: Early Reader',
-      'level2': 'Level 2: Early Reader',
-      'early reader': 'Level 2: Early Reader',
-      'early': 'Level 2: Early Reader',
-      'level 3': 'Level 3: Intermediate',
-      'level3': 'Level 3: Intermediate',
-      'intermediate': 'Level 3: Intermediate',
-      'level 4': 'Level 4: Advanced Reader',
-      'level4': 'Level 4: Advanced Reader',
-      'advanced': 'Level 4: Advanced Reader',
-      'advanced reader': 'Level 4: Advanced Reader',
+      'level 1': 'Level 1',
+      'level1': 'Level 1',
+      'foundations': 'Level 1',
+      'beginner': 'Level 1',
+      'level 2': 'Level 2',
+      'level2': 'Level 2',
+      'early reader': 'Level 2',
+      'early': 'Level 2',
+      'level 3': 'Level 3',
+      'level3': 'Level 3',
+      'intermediate': 'Level 3',
+      'level 4': 'Level 4',
+      'level4': 'Level 4',
+      'advanced': 'Level 4',
+      'advanced reader': 'Level 4',
     };
 
     let result: string | null = levelMap[normalized] || null;
@@ -126,7 +122,6 @@ class FilterEngine {
     const languages = new Set<string>();
     const levels = new Set<string>();
     const categories = new Set<string>();
-    const publishers = new Set<string>();
 
     // Optimize: Single pass through books
     for (let i = 0; i < books.length; i++) {
@@ -138,8 +133,11 @@ class FilterEngine {
 
       // Level
       if (book.level) {
-        const mappedLevel = this.mapLevelToStoryWeaver(book.level) || book.level;
-        levels.add(mappedLevel);
+        const mappedLevel = this.mapLevelToStoryWeaver(book.level);
+        // Task 3: Only include valid filtered levels (Level 1-4)
+        if (mappedLevel) {
+          levels.add(mappedLevel);
+        }
       }
 
       // Categories
@@ -147,16 +145,18 @@ class FilterEngine {
         const mappedCat = mapCategoryToStoryWeaver(cat) || cat;
         categories.add(mappedCat);
       }
-
-      // Publisher
-      if (book.publisher) publishers.add(book.publisher);
     }
+
+    // Task 3: Ensure levels are sorted correctly
+    const validLevels = ['Level 1', 'Level 2', 'Level 3', 'Level 4'];
+    const sortedLevels = Array.from(levels).sort((a, b) => {
+      return validLevels.indexOf(a) - validLevels.indexOf(b);
+    });
 
     return {
       languages: Array.from(languages).sort(),
-      levels: Array.from(levels).sort(),
+      levels: sortedLevels,
       categories: STORYWEAVER_CATEGORIES.filter((cat) => categories.has(cat)) || Array.from(categories).sort(),
-      publishers: Array.from(publishers).sort(),
     };
   }
 }

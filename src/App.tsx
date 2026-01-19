@@ -25,7 +25,6 @@ function MainAppContent() {
     updateLanguage,
     updateLevel,
     updateCategory,
-    updatePublisher,
     updateDateFilter,
     updateSearchQuery,
     reset,
@@ -138,7 +137,6 @@ function MainAppContent() {
                 onLanguageChange={updateLanguage}
                 onLevelChange={updateLevel}
                 onCategoryChange={updateCategory}
-                onPublisherChange={updatePublisher}
                 onDateChange={updateDateFilter}
                 onReset={reset}
                 hasActiveFilters={hasActiveFilters}

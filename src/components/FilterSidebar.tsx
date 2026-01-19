@@ -80,7 +80,6 @@ interface FilterSidebarProps {
   onLanguageChange: (language: string) => void;
   onLevelChange: (level: string) => void;
   onCategoryChange: (category: string) => void;
-  onPublisherChange: (publisher: string) => void;
   onDateChange: (date: FilterState['dateFilter']) => void;
   onReset: () => void;
   hasActiveFilters: boolean;
@@ -93,7 +92,6 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   onLanguageChange,
   onLevelChange,
   onCategoryChange,
-  onPublisherChange,
   onDateChange,
   onReset,
   hasActiveFilters,
@@ -105,7 +103,6 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
     languages: true,
     levels: true,
     categories: true,
-    publishers: false,
   });
   const [languageSearch, setLanguageSearch] = useState('');
   const [categorySearch, setCategorySearch] = useState('');
@@ -255,32 +252,6 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                 />
               ))}
             </div>
-          </FilterSection>
-        )}
-
-        {/* Publisher Filter */}
-        {options.publishers.length > 0 && (
-          <FilterSection
-            title="Publishers"
-            icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>}
-            isOpen={expandedSections.publishers}
-            onToggle={() => toggleSection('publishers')}
-          >
-            <div className="space-y-1 flex-shrink-0 max-h-32 overflow-y-auto custom-scrollbar">
-              {options.publishers.slice(0, 10).map((pub) => (
-                <FilterCheckbox
-                  key={pub}
-                  label={pub}
-                  checked={filters.publishers.has(pub)}
-                  onChange={() => onPublisherChange(pub)}
-                />
-              ))}
-            </div>
-            {options.publishers.length > 10 && (
-              <p className="text-xs text-gray-500 mt-2">
-                +{options.publishers.length - 10} more
-              </p>
-            )}
           </FilterSection>
         )}
 
