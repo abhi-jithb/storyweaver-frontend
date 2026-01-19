@@ -8,11 +8,15 @@ import { Footer } from './components/Footer';
 import { Hero } from './components/Hero';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import ErrorPage from './components/ErrorPage';
 import { BookDetails } from './components/BookDetails';
 import { BrowserRouter as Router } from 'react-router-dom';
 import ScrollToTop from './components/ScrollToTop';
+import { CartProvider, useCart } from './context/CartContext';
+import { CartFloatingButton } from './components/CartFloatingButton';
+import { CartSidebar } from './components/CartSidebar';
+import { SuccessModal } from './components/SuccessModal';
 
 function MainAppContent() {
   const { books, loading, error } = useBooks();
@@ -28,7 +32,18 @@ function MainAppContent() {
     hasActiveFilters,
   } = useFilters();
 
+  const { totalCount, clearCart } = useCart();
   const [showFilters, setShowFilters] = useState(false);
+  const [showCart, setShowCart] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  const handleCheckout = useCallback(() => {
+    console.log('Initiating download for selected books...');
+    // In a real app, this would trigger the actual API call
+    setShowCart(false);
+    setShowSuccess(true);
+    clearCart();
+  }, [clearCart]);
 
   // Calculate unique languages for Hero stats
   const languageCount = useMemo(() => {
@@ -139,6 +154,20 @@ function MainAppContent() {
       </div>
 
       <Footer />
+
+      {/* Cart Components */}
+      <CartFloatingButton onClick={() => setShowCart(true)} />
+      <CartSidebar
+        isOpen={showCart}
+        onClose={() => setShowCart(false)}
+        onCheckout={handleCheckout}
+      />
+      <SuccessModal
+        isOpen={showSuccess}
+        onClose={() => setShowSuccess(false)}
+        title="Request Received!"
+        message={`We've started preparing your ${totalCount} selected stories. You'll be notified as soon as the PDF downloads are ready.`}
+      />
     </div>
   );
 }
@@ -195,7 +224,9 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <RouterProvider router={router} />
+      <CartProvider>
+        <RouterProvider router={router} />
+      </CartProvider>
     </ErrorBoundary>
   );
 }
