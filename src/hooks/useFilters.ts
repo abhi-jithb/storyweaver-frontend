@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { FilterState } from '../types/opds';
 
 const initialFilterState: FilterState = {
-  languages: new Set(),
+  languages: new Set(['English']),
   levels: new Set(),
   categories: new Set(),
   dateFilter: 'all',

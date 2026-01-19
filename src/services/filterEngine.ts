@@ -134,7 +134,6 @@ class FilterEngine {
       // Level
       if (book.level) {
         const mappedLevel = this.mapLevelToStoryWeaver(book.level);
-        // Task 3: Only include valid filtered levels (Level 1-4)
         if (mappedLevel) {
           levels.add(mappedLevel);
         }

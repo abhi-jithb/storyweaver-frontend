@@ -17,7 +17,7 @@ import { CartProvider, useCart } from './context/CartContext';
 import { CartFloatingButton } from './components/CartFloatingButton';
 import { CartSidebar } from './components/CartSidebar';
 import { SuccessPopup } from './components/SuccessPopup';
-import logoImg from './assets/logo/storyweaver-logo.png';
+import { Header } from './components/Header';
 
 function MainAppContent() {
   const { books, loading, loadingMore, error, filterOptions } = useBooks(); // Task 1 & 2: Get dynamic options
@@ -82,54 +82,14 @@ function MainAppContent() {
       <Hero bookCount={books.length} languageCount={languageCount} />
 
       {/* Header */}
-      <header className="glass-white shadow-lg border-b border-white/20">
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-5 sm:py-7">
-          {/* Title Row */}
-          <div className="flex items-start justify-between mb-5 sm:mb-7 gap-3">
-            <div className="flex-1 min-w-0 flex items-center gap-4">
-              {location.pathname !== '/' && (
-                <button
-                  onClick={() => navigate(-1)}
-                  className="p-2 -ml-2 text-gray-600 hover:text-primary-600 hover:bg-white rounded-full transition-all duration-200"
-                  aria-label="Go back"
-                >
-                  <svg className="w-8 h-8 sm:w-10 sm:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                  </svg>
-                </button>
-              )}
-
-
-              <div className="min-w-0">
-                <img
-                  src={logoImg}
-                  alt="StoryWeaver"
-                  className="h-12 sm:h-16 md:h-20 w-auto mb-2 object-contain"
-                />
-                <p className="text-gray-700 text-base sm:text-lg mt-2 font-medium leading-relaxed">
-                  {books.length > 0
-                    ? `Discover ${books.length.toLocaleString()} stories in multiple languages`
-                    : 'Loading book catalog...'}
-                </p>
-              </div>
-            </div>
-
-            {/* Mobile Filter Toggle - In Header */}
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="lg:hidden p-2 text-gray-600 hover:text-primary-600 hover:bg-white rounded-lg transition-all duration-200 mt-2"
-              aria-label={showFilters ? 'Hide filters' : 'Show filters'}
-            >
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Search Bar */}
-          <SearchBar onSearch={updateSearchQuery} />
-        </div>
-      </header>
+      {/* Header */}
+      <Header
+        bookCount={books.length}
+        onSearch={updateSearchQuery}
+        showMobileFilter={true}
+        onToggleFilter={() => setShowFilters(!showFilters)}
+        isFilterOpen={showFilters}
+      />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-6 sm:py-8">
@@ -168,7 +128,7 @@ function MainAppContent() {
             <BookGrid
               books={books}
               filters={filters}
-              loading={loading || loadingMore}
+              loading={loading}
             />
           </div>
         </div>
@@ -196,6 +156,7 @@ function MainAppContent() {
 function PageLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col">
+      <Header showSearch={false} />
       <div className="flex-1">
         {children}
       </div>

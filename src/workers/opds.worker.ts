@@ -37,37 +37,63 @@ async function fetchAllProgressive(mainUrl: string) {
     let lastEmitTime = Date.now();
     const BATCH_INTERVAL = 500;
 
-    const processCatalog = async (link: any) => {
-        try {
-            const res = await fetchWithRetry(link.href);
-            const subXml = await res.text();
-            const subObj = xmlParser.parse(subXml);
+    const processCatalog = async (initialLink: any) => {
+        let currentUrl = initialLink.href;
+        let pageCount = 0;
 
-            const entries = subObj.feed?.entry || [];
-            const entriesArray = Array.isArray(entries) ? entries : entries ? [entries] : [];
+        while (currentUrl && pageCount < 50) { // Safety break after 50 pages per section
+            try {
+                const res = await fetchWithRetry(currentUrl);
+                const subXml = await res.text();
+                const subObj = xmlParser.parse(subXml);
 
-            const books = entriesArray
-                .map((entry: any) => extractBookMetadata(entry, link.title))
-                .filter(Boolean) as Book[];
+                const entries = subObj.feed?.entry || [];
+                const entriesArray = Array.isArray(entries) ? entries : entries ? [entries] : [];
 
-            allBooks.push(...books);
-            completedCount++;
+                const books = entriesArray
+                    .map((entry: any) => extractBookMetadata(entry, initialLink.title))
+                    .filter(Boolean) as Book[];
 
-            const now = Date.now();
-            if (now - lastEmitTime > BATCH_INTERVAL || completedCount === links.length) {
-                self.postMessage({
-                    type: 'PROGRESS',
-                    books: allBooks,
-                    isComplete: completedCount === links.length
-                });
-                lastEmitTime = now;
+                allBooks.push(...books);
+                // Fix: Don't increment completedCount here, we only do it once per initial link
+
+                // Check for next link
+                const feedLinks = subObj.feed?.link || [];
+                const nextLink = (Array.isArray(feedLinks) ? feedLinks : [feedLinks])
+                    .find((l: any) => l.rel === 'next');
+
+                currentUrl = nextLink ? nextLink.href : null;
+
+                // If relative URL, append to base
+                if (currentUrl && !currentUrl.startsWith('http')) {
+                    const baseUrl = new URL(initialLink.href).origin;
+                    currentUrl = new URL(currentUrl, baseUrl).toString();
+                }
+
+                pageCount++;
+
+                const now = Date.now();
+                if (now - lastEmitTime > BATCH_INTERVAL) {
+                    self.postMessage({
+                        type: 'PROGRESS',
+                        books: allBooks,
+                        isComplete: false
+                    });
+                    lastEmitTime = now;
+                }
+            } catch (err) {
+                console.error(`Worker failed to fetch page ${pageCount} of ${initialLink.title}:`, err);
+                break;
             }
-        } catch (err) {
-            completedCount++;
-            console.error(`Worker failed to fetch ${link.title}:`, err);
-            if (completedCount === links.length) {
-                self.postMessage({ type: 'PROGRESS', books: allBooks, isComplete: true });
-            }
+        }
+
+        completedCount++;
+        if (completedCount === links.length) {
+            self.postMessage({
+                type: 'PROGRESS',
+                books: allBooks,
+                isComplete: true
+            });
         }
     };
 
