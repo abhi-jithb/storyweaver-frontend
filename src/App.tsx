@@ -16,7 +16,8 @@ import ScrollToTop from './components/ScrollToTop';
 import { CartProvider, useCart } from './context/CartContext';
 import { CartFloatingButton } from './components/CartFloatingButton';
 import { CartSidebar } from './components/CartSidebar';
-import { SuccessModal } from './components/SuccessModal';
+import { SuccessPopup } from './components/SuccessPopup';
+import logoImg from './assets/logo/storyweaver-logo.png';
 
 function MainAppContent() {
   const { books, loading, error, filterOptions } = useBooks(); // Task 1 & 2: Get dynamic options
@@ -110,10 +111,16 @@ function MainAppContent() {
                 </button>
               )}
 
+              import logoImg from './assets/logo/storyweaver-logo.png';
+
+              // ... imports
+
               <div className="min-w-0">
-                <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-black gradient-text-purple leading-tight mb-2">
-                  StoryWeaver OPDS
-                </h1>
+                <img
+                  src={logoImg}
+                  alt="StoryWeaver"
+                  className="h-12 sm:h-16 md:h-20 w-auto mb-2 object-contain"
+                />
                 <p className="text-gray-700 text-base sm:text-lg mt-2 font-medium leading-relaxed">
                   {books.length > 0
                     ? `Discover ${books.length.toLocaleString()} stories in multiple languages`
@@ -176,7 +183,7 @@ function MainAppContent() {
         onClose={() => setShowCart(false)}
         onCheckout={handleCheckout}
       />
-      <SuccessModal
+      <SuccessPopup
         isOpen={showSuccess}
         onClose={() => setShowSuccess(false)}
         title="Request Received!"
