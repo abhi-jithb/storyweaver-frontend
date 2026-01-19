@@ -786,29 +786,29 @@ export function getLanguagesByRegion(region: string): string[] {
 }
 
 export const STORYWEAVER_LEVELS = [
-  'Level 1: Foundations',
-  'Level 2: Early Reader',
-  'Level 3: Intermediate',
-  'Level 4: Advanced Reader',
+  'Level 1',
+  'Level 2',
+  'Level 3',
+  'Level 4',
 ];
 
 export const READING_LEVEL_INFO: Record<
   string,
   { description: string; ageRange: string }
 > = {
-  'Level 1: Foundations': {
+  'Level 1': {
     description: 'For beginning readers learning letters and sounds',
     ageRange: 'Ages 3-4',
   },
-  'Level 2: Early Reader': {
+  'Level 2': {
     description: 'For early readers with emerging decoding skills',
     ageRange: 'Ages 5-6',
   },
-  'Level 3: Intermediate': {
+  'Level 3': {
     description: 'For readers gaining confidence and fluency',
     ageRange: 'Ages 7-8',
   },
-  'Level 4: Advanced Reader': {
+  'Level 4': {
     description: 'For advanced readers with strong comprehension',
     ageRange: 'Ages 9+',
   },
