@@ -1,7 +1,7 @@
 
 import { Book, FilterState, FilterOptions } from '../types/opds';
-import { STORYWEAVER_CATEGORIES, mapCategoryToStoryWeaver } from '../utils/storyWeaverCategories';
-import { STORYWEAVER_LEVELS, mapLanguageToStoryWeaver } from '../utils/storyWeaverLanguages';
+import { STORYWEAVER_CATEGORIES, mapCategoryToStoryWeaver, STORYWEAVER_LEVELS } from '../utils/storyWeaverCategories';
+import { mapLanguageToStoryWeaver } from '../utils/storyWeaverLanguages';
 
 class FilterEngine {
   filterBooks(books: Book[], filters: FilterState): Book[] {

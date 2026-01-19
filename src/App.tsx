@@ -7,12 +7,15 @@ import { LoadingSpinner } from './components/LoadingSpinner';
 import { Footer } from './components/Footer';
 import { Hero } from './components/Hero';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import { useState, useMemo } from 'react';
 import ErrorPage from './components/ErrorPage';
+import { BookDetails } from './components/BookDetails';
+import { BrowserRouter as Router } from 'react-router-dom';
+import ScrollToTop from './components/ScrollToTop';
 
 function MainAppContent() {
-  const { books, loading, loadingMore, error } = useBooks();
+  const { books, loading, error } = useBooks();
   const {
     filters,
     updateLanguage,
@@ -25,7 +28,7 @@ function MainAppContent() {
     hasActiveFilters,
   } = useFilters();
 
-  const [showFilters, setShowFilters] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
 
   // Calculate unique languages for Hero stats
   const languageCount = useMemo(() => {
@@ -98,30 +101,36 @@ function MainAppContent() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-6 sm:py-8">
         <div className="flex flex-col md:flex-row gap-4 sm:gap-6 items-start">
-          {showFilters && (
-            <>
-              <div
-                className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
-                onClick={() => setShowFilters(false)}
+          {/* Filters - Always visible on desktop, togglable on mobile */}
+          <div
+            className={`
+              ${showFilters ? 'fixed inset-0 bg-black/50 z-40 lg:hidden' : 'hidden'}
+            `}
+            onClick={() => setShowFilters(false)}
+          />
+
+          <div className={`
+            w-full lg:w-72 flex-shrink-0 
+            lg:relative fixed lg:top-auto top-0 left-0 h-full lg:h-auto z-50 lg:z-auto 
+            max-w-sm lg:max-w-none transform transition-transform duration-300 ease-in-out
+            ${showFilters ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+            ${!showFilters ? 'hidden lg:block' : 'block'}
+          `}>
+            <div className="bg-white rounded-r-2xl lg:rounded-2xl border-r lg:border border-gray-200 shadow-2xl lg:shadow-lg h-full lg:h-auto overflow-y-auto custom-scrollbar">
+              <FilterSidebar
+                books={books}
+                filters={filters}
+                onLanguageChange={updateLanguage}
+                onLevelChange={updateLevel}
+                onCategoryChange={updateCategory}
+                onPublisherChange={updatePublisher}
+                onDateChange={updateDateFilter}
+                onReset={reset}
+                hasActiveFilters={hasActiveFilters}
+                onClose={() => setShowFilters(false)}
               />
-              <div className="w-full md:w-64 flex-shrink-0 lg:relative fixed lg:top-auto top-0 left-0 h-full lg:h-auto z-50 lg:z-auto max-w-sm lg:max-w-none">
-                <div className="bg-white rounded-2xl lg:rounded-2xl border border-gray-200 shadow-xl lg:shadow-lg h-full lg:h-auto overflow-y-auto custom-scrollbar">
-                  <FilterSidebar
-                    books={books}
-                    filters={filters}
-                    onLanguageChange={updateLanguage}
-                    onLevelChange={updateLevel}
-                    onCategoryChange={updateCategory}
-                    onPublisherChange={updatePublisher}
-                    onDateChange={updateDateFilter}
-                    onReset={reset}
-                    hasActiveFilters={hasActiveFilters}
-                    onClose={() => setShowFilters(false)}
-                  />
-                </div>
-              </div>
-            </>
-          )}
+            </div>
+          </div>
 
           <div className="flex-1 min-w-0">
             <BookGrid books={books} filters={filters} />
@@ -134,19 +143,53 @@ function MainAppContent() {
   );
 }
 
+function PageLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-screen flex flex-col">
+      <div className="flex-1">
+        {children}
+      </div>
+      <Footer />
+    </div>
+  );
+}
+
 function App() {
   const router = createBrowserRouter([
     {
       path: "/",
-      element: <MainAppContent />,
+      element: (
+        <>
+          <ScrollToTop /> {/* Reset scroll on home */}
+          <MainAppContent />
+        </>
+      ),
     },
     {
       path: "/search",
-      element: <MainAppContent />,
+      element: (
+        <>
+          <ScrollToTop />
+          <MainAppContent />
+        </>
+      ),
+    },
+    {
+      path: "/book/:bookId",
+      element: (
+        <>
+          <ScrollToTop />
+          <PageLayout><BookDetails /></PageLayout>
+        </>
+      ),
+    },
+    {
+      path: "/404",
+      element: <ErrorPage />,
     },
     {
       path: "*",
-      element: <ErrorPage />,
+      element: <Navigate to="/404" />,
     },
   ]);
 
