@@ -78,19 +78,6 @@ function MainAppContent() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-orange-50 to-cyan-50 animate-fadeIn">
-      {/* Mobile Filter Toggle - Fixed Top Right */}
-      <button
-        onClick={() => setShowFilters(!showFilters)}
-        className="lg:hidden fixed top-4 right-4 z-[100] bg-gradient-to-r from-primary-500 to-secondary-500 text-white p-3.5 rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 border-2 border-white/50 backdrop-blur-sm"
-        aria-label={showFilters ? 'Hide filters' : 'Show filters'}
-      >
-        {showFilters ? (
-          <svg className="w-6 h-6 font-bold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
-        ) : (
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M4 6h16M4 12h16m-7 6h7" /></svg>
-        )}
-      </button>
-
       {/* Hero Section */}
       <Hero bookCount={books.length} languageCount={languageCount} />
 
@@ -126,6 +113,17 @@ function MainAppContent() {
                 </p>
               </div>
             </div>
+
+            {/* Mobile Filter Toggle - In Header */}
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="lg:hidden p-2 text-gray-600 hover:text-primary-600 hover:bg-white rounded-lg transition-all duration-200 mt-2"
+              aria-label={showFilters ? 'Hide filters' : 'Show filters'}
+            >
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
           </div>
 
           {/* Search Bar */}
