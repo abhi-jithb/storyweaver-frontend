@@ -20,8 +20,9 @@ import { SuccessPopup } from './components/SuccessPopup';
 import logoImg from './assets/logo/storyweaver-logo.png';
 
 function MainAppContent() {
-  const { books, loading, error, filterOptions } = useBooks(); // Task 1 & 2: Get dynamic options
+  const { books, loading, loadingMore, error, filterOptions } = useBooks(); // Task 1 & 2: Get dynamic options
   const location = useLocation();
+  // ...
   const navigate = useNavigate();
   const {
     filters,
@@ -111,9 +112,6 @@ function MainAppContent() {
                 </button>
               )}
 
-              import logoImg from './assets/logo/storyweaver-logo.png';
-
-              // ... imports
 
               <div className="min-w-0">
                 <img
@@ -169,7 +167,11 @@ function MainAppContent() {
           </div>
 
           <div className="flex-1 min-w-0">
-            <BookGrid books={books} filters={filters} />
+            <BookGrid
+              books={books}
+              filters={filters}
+              loading={loading || loadingMore}
+            />
           </div>
         </div>
       </div>

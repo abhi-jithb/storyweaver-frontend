@@ -5,17 +5,20 @@ import { searchAlgorithm } from '../services/searchAlgorithm';
 import { filterEngine } from '../services/filterEngine';
 import { PAGE_SIZE } from '../utils/constants';
 import { useCart } from '../context/CartContext';
+import { LoadingSpinner } from './LoadingSpinner';
 
 interface BookGridProps {
   books: Book[];
   filters: FilterState;
+  loading?: boolean;
 }
 
-export const BookGrid: React.FC<BookGridProps> = ({ books, filters }) => {
+export const BookGrid: React.FC<BookGridProps> = ({ books, filters, loading }) => {
   const { selectAll, deselectAll, selectedBooks } = useCart();
   const [currentPage, setCurrentPage] = useState(1);
   const deferredSearch = useDeferredValue(filters.searchQuery);
 
+  // ... (useMemo for processedBooks remains same) ...
   const processedBooks = useMemo(() => {
     let result = filterEngine.filterBooks(books, filters);
 
@@ -27,6 +30,8 @@ export const BookGrid: React.FC<BookGridProps> = ({ books, filters }) => {
 
     return result;
   }, [books, filters, deferredSearch]);
+
+  // ... (other hooks) ...
 
   const allSelectedInView = useMemo(() => {
     if (processedBooks.length === 0) return false;
@@ -53,6 +58,15 @@ export const BookGrid: React.FC<BookGridProps> = ({ books, filters }) => {
   }, [filters]);
 
   if (processedBooks.length === 0) {
+    if (loading) {
+      return (
+        <div className="col-span-full flex flex-col items-center justify-center py-20">
+          <LoadingSpinner />
+          <p className="text-gray-400 text-sm mt-4">Searching books...</p>
+        </div>
+      );
+    }
+
     return (
       <div className="col-span-full flex flex-col items-center justify-center py-20">
         <p className="text-gray-500 text-lg mb-4">📭 No books found</p>
@@ -69,8 +83,8 @@ export const BookGrid: React.FC<BookGridProps> = ({ books, filters }) => {
           <button
             onClick={handleSelectAll}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 ${allSelectedInView
-                ? 'bg-secondary-100 text-secondary-700 border-2 border-secondary-200'
-                : 'bg-primary-500 text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 border-2 border-transparent'
+              ? 'bg-secondary-100 text-secondary-700 border-2 border-secondary-200'
+              : 'bg-primary-500 text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 border-2 border-transparent'
               }`}
           >
             <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${allSelectedInView ? 'bg-secondary-600 border-secondary-600' : 'bg-white border-gray-300'
