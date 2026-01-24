@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { Book } from '../types/opds';
 
 import { truncateText, formatDate } from '../utils/formatters';
+import { useCart } from '../context/CartContext';
 
 
 
@@ -19,66 +20,66 @@ interface BookCardProps {
 
 
 export const BookCard: React.FC<BookCardProps> = ({ book, score }) => {
+  const { toggleBook, isBookSelected } = useCart();
+  const isSelected = isBookSelected(book.id);
+
+  const handleToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleBook(book);
+  };
 
   return (
-
     <Link
-
       to={`/book/${book.id}`}
-
-      className="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-500 flex flex-col h-full transform hover:scale-[1.03] hover:-translate-y-2 animate-fadeIn border border-gray-100 cursor-pointer"
-
+      className={`group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-500 flex flex-col h-full transform hover:scale-[1.03] hover:-translate-y-2 animate-fadeIn border-2 cursor-pointer ${isSelected ? 'border-primary-500 shadow-xl' : 'border-gray-100'
+        }`}
     >
-
       {/* Book Cover */}
-
       <div className="relative bg-gradient-to-br from-primary-100 via-secondary-100 to-accent-100 h-48 overflow-hidden">
-
         {book.cover ? (
-
           <>
-
             <img
-
               src={book.cover}
-
               alt={book.title}
-
               loading="lazy"
-
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-
               onError={(e) => {
-
                 (e.target as HTMLImageElement).src = '';
-
               }}
-
             />
-
             {/* Gradient Overlay on Hover */}
-
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
-
               <span className="text-white text-xs font-black uppercase tracking-widest bg-primary-500/80 backdrop-blur-sm px-4 py-2 rounded-full transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 shadow-lg">
-
                 View Details
-
               </span>
-
             </div>
-
           </>
-
         ) : (
-
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-200 to-secondary-200 animate-pulse-slow">
-
             <span className="text-white text-center px-4 text-sm font-medium">No Cover Available</span>
-
           </div>
-
         )}
+
+        {/* Selection Checkbox - Top Right */}
+        <button
+          onClick={handleToggle}
+          className={`absolute top-3 right-3 z-10 w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-300 shadow-md ${isSelected
+              ? 'bg-primary-500 border-primary-500 scale-110'
+              : 'bg-white/70 backdrop-blur-md border-white/50 hover:bg-white hover:scale-110'
+            }`}
+          aria-label={isSelected ? 'Deselect book' : 'Select book'}
+        >
+          {isSelected ? (
+            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M5 13l4 4L19 7" />
+            </svg>
+          ) : (
+            <svg className="w-5 h-5 text-primary-500 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" />
+            </svg>
+          )}
+        </button>
 
         {book.level && (
           <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider text-primary-600 shadow-sm border border-primary-100/50 animate-scaleIn">
@@ -88,17 +89,6 @@ export const BookCard: React.FC<BookCardProps> = ({ book, score }) => {
             {book.level}
           </div>
         )}
-
-        {score && (
-
-          <div className="absolute top-3 right-3 bg-gradient-to-r from-green-500 to-green-600 text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-lg animate-scaleIn">
-
-            Match: {Math.round(score * 100)}%
-
-          </div>
-
-        )}
-
       </div>
 
 

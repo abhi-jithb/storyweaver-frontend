@@ -2,10 +2,9 @@ import { useState, useCallback } from 'react';
 import { FilterState } from '../types/opds';
 
 const initialFilterState: FilterState = {
-  languages: new Set(),
+  languages: new Set(['English']),
   levels: new Set(),
   categories: new Set(),
-  publishers: new Set(),
   dateFilter: 'all',
   searchQuery: '',
 };
@@ -37,13 +36,6 @@ export function useFilters() {
     });
   }, []);
 
-  const updatePublisher = useCallback((publisher: string) => {
-    setFilters((prev) => {
-      const updated = new Set(prev.publishers);
-      updated.has(publisher) ? updated.delete(publisher) : updated.add(publisher);
-      return { ...prev, publishers: updated };
-    });
-  }, []);
 
   const updateDateFilter = useCallback(
     (dateFilter: 'all' | 'newest' | 'oldest' | 'last30days' | 'lastyear') => {
@@ -64,7 +56,6 @@ export function useFilters() {
     filters.languages.size > 0 ||
     filters.levels.size > 0 ||
     filters.categories.size > 0 ||
-    filters.publishers.size > 0 ||
     filters.dateFilter !== 'all' ||
     filters.searchQuery.trim().length > 0;
 
@@ -73,7 +64,6 @@ export function useFilters() {
     updateLanguage,
     updateLevel,
     updateCategory,
-    updatePublisher,
     updateDateFilter,
     updateSearchQuery,
     reset,

@@ -18,7 +18,6 @@ export interface FilterState {
   languages: Set<string>;
   levels: Set<string>;
   categories: Set<string>;
-  publishers: Set<string>;
   dateFilter: 'all' | 'newest' | 'oldest' | 'last30days' | 'lastyear';
   searchQuery: string;
 }
@@ -32,6 +31,5 @@ export interface FilterOptions {
   languages: string[];
   levels: string[];
   categories: string[];
-  publishers: string[];
 }
 ""

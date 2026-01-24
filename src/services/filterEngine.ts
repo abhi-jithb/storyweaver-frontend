@@ -1,74 +1,51 @@
 
 import { Book, FilterState, FilterOptions } from '../types/opds';
-import { STORYWEAVER_CATEGORIES, mapCategoryToStoryWeaver, STORYWEAVER_LEVELS } from '../utils/storyWeaverCategories';
+import { STORYWEAVER_CATEGORIES, mapCategoryToStoryWeaver } from '../utils/storyWeaverCategories';
 import { mapLanguageToStoryWeaver } from '../utils/storyWeaverLanguages';
 
 class FilterEngine {
+  private levelMappingCache: Map<string, string | null> = new Map();
+
   filterBooks(books: Book[], filters: FilterState): Book[] {
-    let filtered = books.filter(
+    const hasLang = filters.languages.size > 0;
+    const hasLevel = filters.levels.size > 0;
+    const hasCat = filters.categories.size > 0;
+    const hasDate = filters.dateFilter !== 'all' && filters.dateFilter !== 'newest' && filters.dateFilter !== 'oldest';
+
+    const filtered = books.filter(
       (book) =>
-        this.matchLanguage(book, filters) &&
-        this.matchLevel(book, filters) &&
-        this.matchCategories(book, filters) &&
-        this.matchPublisher(book, filters) &&
-        this.matchDate(book, filters)
+        (!hasLang || this.matchLanguage(book, filters)) &&
+        (!hasLevel || this.matchLevel(book, filters)) &&
+        (!hasCat || this.matchCategories(book, filters)) &&
+        (!hasDate || this.matchDate(book, filters))
     );
 
-    // Apply sorting by date
     return this.sortBooks(filtered, filters.dateFilter);
   }
 
   private matchLanguage(book: Book, filters: FilterState): boolean {
-    if (filters.languages.size === 0) return true;
-
-    // Direct match
     if (filters.languages.has(book.language)) return true;
-
-    // Mapped match (from OPDS to StoryWeaver)
     const mappedLanguage = mapLanguageToStoryWeaver(book.language);
-    if (mappedLanguage && filters.languages.has(mappedLanguage)) return true;
-
-    return false;
+    return !!(mappedLanguage && filters.languages.has(mappedLanguage));
   }
 
   private matchLevel(book: Book, filters: FilterState): boolean {
-    if (filters.levels.size === 0) return true;
-
     if (!book.level) return false;
-
-    // Direct match
+    // Task 3: Check against strict levels (Level 1-4)
     if (filters.levels.has(book.level)) return true;
-
-    // Mapped match (from OPDS to StoryWeaver level)
     const mappedLevel = this.mapLevelToStoryWeaver(book.level);
-    if (mappedLevel && filters.levels.has(mappedLevel)) return true;
-
-    return false;
+    return !!(mappedLevel && filters.levels.has(mappedLevel));
   }
 
   private matchCategories(book: Book, filters: FilterState): boolean {
-    if (filters.categories.size === 0) return true;
-
     return book.categories.some((cat) => {
-      // Direct match
       if (filters.categories.has(cat)) return true;
-
-      // Mapped match (from OPDS to StoryWeaver)
       const mappedCategory = mapCategoryToStoryWeaver(cat);
-      if (mappedCategory && filters.categories.has(mappedCategory)) return true;
-
-      return false;
+      return !!(mappedCategory && filters.categories.has(mappedCategory));
     });
   }
 
-  private matchPublisher(book: Book, filters: FilterState): boolean {
-    if (filters.publishers.size === 0) return true;
-    return book.publisher ? filters.publishers.has(book.publisher) : false;
-  }
-
   private matchDate(book: Book, filters: FilterState): boolean {
-    // Only filter by date if date-specific filter is selected
-    // For 'all', 'newest', 'oldest' - don't filter, just sort
     if (!book.publishedDate) return true;
 
     const bookDate = new Date(book.publishedDate);
@@ -85,135 +62,100 @@ class FilterEngine {
         oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
         return bookDate >= oneYearAgo;
       }
-      case 'all':
-      case 'newest':
-      case 'oldest':
       default:
-        return true; // Don't filter, will be sorted instead
+        return true;
     }
   }
 
   private mapLevelToStoryWeaver(level: string): string | null {
-    const normalized = level.toLowerCase().trim();
-
-    const levelMap: Record<string, string> = {
-      'level 1': 'Level 1: Foundations',
-      'level1': 'Level 1: Foundations',
-      'foundations': 'Level 1: Foundations',
-      'beginner': 'Level 1: Foundations',
-
-      'level 2': 'Level 2: Early Reader',
-      'level2': 'Level 2: Early Reader',
-      'early reader': 'Level 2: Early Reader',
-      'early': 'Level 2: Early Reader',
-
-      'level 3': 'Level 3: Intermediate',
-      'level3': 'Level 3: Intermediate',
-      'intermediate': 'Level 3: Intermediate',
-
-      'level 4': 'Level 4: Advanced Reader',
-      'level4': 'Level 4: Advanced Reader',
-      'advanced': 'Level 4: Advanced Reader',
-      'advanced reader': 'Level 4: Advanced Reader',
-    };
-
-    // Try exact match first
-    if (levelMap[normalized]) {
-      return levelMap[normalized];
+    if (this.levelMappingCache.has(level)) {
+      return this.levelMappingCache.get(level)!;
     }
 
-    // Try partial match
-    for (const [key, value] of Object.entries(levelMap)) {
-      if (normalized.includes(key) || key.includes(normalized)) {
-        return value;
+    const normalized = level.toLowerCase().trim();
+    // Task 3: Strict Levels 1-4
+    const levelMap: Record<string, string> = {
+      'level 1': 'Level 1',
+      'level1': 'Level 1',
+      'foundations': 'Level 1',
+      'beginner': 'Level 1',
+      'level 2': 'Level 2',
+      'level2': 'Level 2',
+      'early reader': 'Level 2',
+      'early': 'Level 2',
+      'level 3': 'Level 3',
+      'level3': 'Level 3',
+      'intermediate': 'Level 3',
+      'level 4': 'Level 4',
+      'level4': 'Level 4',
+      'advanced': 'Level 4',
+      'advanced reader': 'Level 4',
+    };
+
+    let result: string | null = levelMap[normalized] || null;
+    if (!result) {
+      for (const [key, value] of Object.entries(levelMap)) {
+        if (normalized.includes(key) || key.includes(normalized)) {
+          result = value;
+          break;
+        }
       }
     }
 
-    return null;
+    this.levelMappingCache.set(level, result);
+    return result;
   }
 
   sortBooks(books: Book[], dateFilter: string): Book[] {
+    if (dateFilter === 'all' || !dateFilter) return books;
+
     const sorted = [...books];
-
-    switch (dateFilter) {
-      case 'newest': {
-        sorted.sort(
-          (a, b) =>
-            new Date(b.publishedDate || 0).getTime() -
-            new Date(a.publishedDate || 0).getTime()
-        );
-        break;
-      }
-      case 'oldest': {
-        sorted.sort(
-          (a, b) =>
-            new Date(a.publishedDate || 0).getTime() -
-            new Date(b.publishedDate || 0).getTime()
-        );
-        break;
-      }
-      case 'all':
-      default:
-        // No sorting, return as-is
-        break;
+    if (dateFilter === 'newest') {
+      sorted.sort((a, b) => (b.publishedDate || '').localeCompare(a.publishedDate || ''));
+    } else if (dateFilter === 'oldest') {
+      sorted.sort((a, b) => (a.publishedDate || '').localeCompare(b.publishedDate || ''));
     }
-
     return sorted;
   }
 
   getFilterOptions(books: Book[]): FilterOptions {
-    // Collect all unique categories and map to StoryWeaver names
-    const allCategories = new Set<string>();
+    const languages = new Set<string>();
+    const levels = new Set<string>();
+    const categories = new Set<string>();
 
-    books.forEach((book) => {
-      book.categories.forEach((cat) => {
-        const mapped = mapCategoryToStoryWeaver(cat);
-        if (mapped) {
-          allCategories.add(mapped);
-        } else {
-          allCategories.add(cat);
-        }
-      });
-    });
+    // Optimize: Single pass through books
+    for (let i = 0; i < books.length; i++) {
+      const book = books[i];
 
-    // Collect all unique levels and map to StoryWeaver levels
-    const allLevels = new Set<string>();
+      // Language
+      const mappedLang = mapLanguageToStoryWeaver(book.language) || book.language;
+      languages.add(mappedLang);
 
-    books.forEach((book) => {
+      // Level
       if (book.level) {
-        // Try to map to StoryWeaver level
         const mappedLevel = this.mapLevelToStoryWeaver(book.level);
         if (mappedLevel) {
-          allLevels.add(mappedLevel);
-        } else {
-          allLevels.add(book.level);
+          levels.add(mappedLevel);
         }
       }
-    });
 
-    // Collect all unique languages and map to StoryWeaver names
-    const allLanguages = new Set<string>();
-
-    books.forEach((book) => {
-      const mapped = mapLanguageToStoryWeaver(book.language);
-      if (mapped) {
-        allLanguages.add(mapped);
-      } else {
-        allLanguages.add(book.language);
+      // Categories
+      for (const cat of book.categories) {
+        const mappedCat = mapCategoryToStoryWeaver(cat) || cat;
+        categories.add(mappedCat);
       }
+    }
+
+    // Task 3: Ensure levels are sorted correctly
+    const validLevels = ['Level 1', 'Level 2', 'Level 3', 'Level 4'];
+    const sortedLevels = Array.from(levels).sort((a, b) => {
+      return validLevels.indexOf(a) - validLevels.indexOf(b);
     });
 
     return {
-      languages: Array.from(allLanguages).sort(),
-      levels: Array.from(allLevels).sort(),
-      categories: STORYWEAVER_CATEGORIES.filter((cat) => allCategories.has(cat)),
-      publishers: Array.from(
-        new Set(
-          books
-            .map((b) => b.publisher)
-            .filter((publisher): publisher is string => Boolean(publisher))
-        )
-      ).sort(),
+      languages: Array.from(languages).sort(),
+      levels: sortedLevels,
+      categories: STORYWEAVER_CATEGORIES.filter((cat) => categories.has(cat)) || Array.from(categories).sort(),
     };
   }
 }
