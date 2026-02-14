@@ -137,6 +137,7 @@ function extractBookMetadata(entry: any, language: string): Book | null {
         author: extractAuthor(entry.author),
         summary: entry.summary || entry.content || '',
         cover: links.find((l: any) => l.rel === 'http://opds-spec.org/image')?.href || '',
+        thumbnail: links.find((l: any) => l.rel === 'http://opds-spec.org/image/thumbnail')?.href,
         downloadLink: links.find((l: any) => l.rel?.includes('acquisition'))?.href || '',
         language,
         level: extractLevel(entry),

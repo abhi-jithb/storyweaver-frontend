@@ -2,6 +2,7 @@ import React, { useMemo, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useBooks } from '../hooks/useBooks';
 import { LoadingSpinner } from './LoadingSpinner';
+import { ImageWithLoader } from './ImageWithLoader';
 import {
     Home,
     ChevronRight,
@@ -79,7 +80,13 @@ export const BookDetails: React.FC = () => {
                     <div className="lg:col-span-4 flex flex-col items-center lg:items-start gap-4">
                         <div className="w-full max-w-[320px] bg-white border border-gray-100 rounded-2xl shadow-xl overflow-hidden group">
                             <div className="relative aspect-[3/4] overflow-hidden">
-                                <img src={book.cover} alt={book.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                                <ImageWithLoader
+                                    src={book.cover}
+                                    thumbnail={book.thumbnail}
+                                    alt={book.title}
+                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                    priority={true}
+                                />
                             </div>
                             <div className="bg-primary-600 text-white px-3 py-2 text-[10px] font-black uppercase tracking-widest flex items-center justify-between">
                                 <span>{book.language}</span>

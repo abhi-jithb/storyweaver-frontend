@@ -120,8 +120,12 @@ export const BookGrid: React.FC<BookGridProps> = ({ books, filters, loading }) =
 
       {/* Responsive Book Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8 flex-1">
-        {paginatedBooks.map((book) => (
-          <BookCard key={book.id} book={book} />
+        {paginatedBooks.map((book, index) => (
+          <BookCard
+            key={book.id}
+            book={book}
+            priority={index < 8}
+          />
         ))}
       </div>
 

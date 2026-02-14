@@ -4,6 +4,7 @@ export interface Book {
   author: string;
   summary: string;
   cover: string;
+  thumbnail?: string;
   downloadLink: string;
   language: string;
   level?: string;

@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Link } from 'react-router-dom';
+import { ImageWithLoader } from './ImageWithLoader';
 
 import { Book } from '../types/opds';
 
@@ -14,12 +15,12 @@ interface BookCardProps {
   book: Book;
 
   score?: number;
-
+  priority?: boolean;
 }
 
 
 
-export const BookCard: React.FC<BookCardProps> = ({ book, score }) => {
+export const BookCard: React.FC<BookCardProps> = ({ book, score, priority = false }) => {
   const { toggleBook, isBookSelected } = useCart();
   const isSelected = isBookSelected(book.id);
 
@@ -36,37 +37,28 @@ export const BookCard: React.FC<BookCardProps> = ({ book, score }) => {
         }`}
     >
       {/* Book Cover */}
-      <div className="relative bg-gradient-to-br from-primary-100 via-secondary-100 to-accent-100 h-48 overflow-hidden">
-        {book.cover ? (
-          <>
-            <img
-              src={book.cover}
-              alt={book.title}
-              loading="lazy"
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = '';
-              }}
-            />
-            {/* Gradient Overlay on Hover */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
-              <span className="text-white text-xs font-black uppercase tracking-widest bg-primary-500/80 backdrop-blur-sm px-4 py-2 rounded-full transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 shadow-lg">
-                View Details
-              </span>
-            </div>
-          </>
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-200 to-secondary-200 animate-pulse-slow">
-            <span className="text-white text-center px-4 text-sm font-medium">No Cover Available</span>
-          </div>
-        )}
+      <div className="relative bg-gray-100 h-48 overflow-hidden">
+        <ImageWithLoader
+          src={book.cover}
+          thumbnail={book.thumbnail}
+          alt={book.title}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          priority={priority}
+        />
+
+        {/* Gradient Overlay on Hover */}
+        <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4 pointer-events-none group-hover:pointer-events-auto">
+          <span className="text-white text-xs font-black uppercase tracking-widest bg-primary-500/80 backdrop-blur-sm px-4 py-2 rounded-full transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 shadow-lg">
+            View Details
+          </span>
+        </div>
 
         {/* Selection Checkbox - Top Right */}
         <button
           onClick={handleToggle}
           className={`absolute top-3 right-3 z-10 w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-300 shadow-md ${isSelected
-              ? 'bg-primary-500 border-primary-500 scale-110'
-              : 'bg-white/70 backdrop-blur-md border-white/50 hover:bg-white hover:scale-110'
+            ? 'bg-primary-500 border-primary-500 scale-110'
+            : 'bg-white/70 backdrop-blur-md border-white/50 hover:bg-white hover:scale-110'
             }`}
           aria-label={isSelected ? 'Deselect book' : 'Select book'}
         >
