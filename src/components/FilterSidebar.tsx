@@ -44,6 +44,8 @@ interface FilterSectionProps {
   onToggle: () => void;
 }
 
+import { motion, AnimatePresence } from 'framer-motion';
+
 const FilterSection = memo(({
   title,
   icon,
@@ -51,23 +53,35 @@ const FilterSection = memo(({
   isOpen,
   onToggle,
 }: FilterSectionProps) => (
-  <div className="mb-4 last:mb-0 flex flex-col">
+  <div className="mb-4 last:mb-0 flex flex-col border-b border-gray-100 last:border-0 pb-4 last:pb-0">
     <button
       onClick={onToggle}
-      className="flex items-center justify-between w-full hover:text-blue-600 transition-colors mb-2 py-2 sm:py-1.5 flex-shrink-0 min-h-[44px] sm:min-h-0"
+      className="flex items-center justify-between w-full hover:text-primary-600 transition-colors mb-2 py-2 sm:py-1.5 flex-shrink-0 min-h-[44px] sm:min-h-0 group"
     >
-      <h3 className="font-semibold text-gray-900 text-sm sm:text-base flex items-center gap-2">
-        {icon}
+      <h3 className="font-semibold text-gray-900 text-sm sm:text-base flex items-center gap-2 group-hover:text-primary-700 transition-colors">
+        <span className="text-primary-500 bg-primary-50 p-1.5 rounded-lg group-hover:bg-primary-100 transition-colors">{icon}</span>
         {title}
       </h3>
-      <span
-        className={`text-gray-500 text-sm sm:text-xs transition-transform duration-200 flex-shrink-0 ${isOpen ? 'rotate-180' : ''
-          }`}
+      <motion.span
+        animate={{ rotate: isOpen ? 180 : 0 }}
+        className="text-gray-400 text-sm sm:text-xs flex-shrink-0"
       >
         ▼
-      </span>
+      </motion.span>
     </button>
-    {isOpen && <div className="space-y-1">{children}</div>}
+    <AnimatePresence initial={false}>
+      {isOpen && (
+        <motion.div
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: "auto", opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+          className="overflow-hidden"
+        >
+          <div className="space-y-1 pt-1 pl-1">{children}</div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   </div>
 ));
 
