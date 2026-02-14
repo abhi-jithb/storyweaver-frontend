@@ -18,6 +18,7 @@ import { CartFloatingButton } from './components/CartFloatingButton';
 import { CartSidebar } from './components/CartSidebar';
 import { SuccessPopup } from './components/SuccessPopup';
 import { Header } from './components/Header';
+import { BooksProvider } from './context/BooksContext';
 
 function MainAppContent() {
   const { books, loading, loadingMore, error, filterOptions } = useBooks(); // Task 1 & 2: Get dynamic options
@@ -206,11 +207,14 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <CartProvider>
-        <RouterProvider router={router} />
-      </CartProvider>
+      <BooksProvider>
+        <CartProvider>
+          <RouterProvider router={router} />
+        </CartProvider>
+      </BooksProvider>
     </ErrorBoundary>
   );
 }
 
 export default App;
+
