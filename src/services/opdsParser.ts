@@ -7,14 +7,17 @@ interface CacheEntry {
   timestamp: number;
 }
 
+type SubscriberCallback = (books: Book[], isComplete: boolean, error: string | null) => void;
+
 class OpdsParser {
   private worker: Worker | null = null;
   private isFetching = false;
 
   // State for Observer Pattern
-  private subscribers: Set<(books: Book[], isComplete: boolean) => void> = new Set();
+  private subscribers: Set<SubscriberCallback> = new Set();
   private currentBooks: Book[] = [];
   private isComplete = false;
+  private currentError: string | null = null;
 
   constructor() { }
 
@@ -31,19 +34,32 @@ class OpdsParser {
       const { type, books, isComplete, error } = e.data;
 
       if (type === 'PROGRESS') {
-        this.currentBooks = books;
-        this.isComplete = isComplete;
+        const networkBooks = books as Book[];
 
-        // Notify all subscribers
+        // Use a Map to merge while preserving local/manual books
+        const bookMap = new Map<string, Book>();
+
+        // 1. Add existing books (preserves local manual ones)
+        this.currentBooks.forEach(b => bookMap.set(b.id, b));
+
+        // 2. Add/Overwrite with network books
+        networkBooks.forEach(b => bookMap.set(b.id, b));
+
+        this.currentBooks = Array.from(bookMap.values());
+        this.isComplete = isComplete;
+        this.currentError = null;
+
         this.notifySubscribers();
 
         if (isComplete) {
           this.isFetching = false;
-          persistenceService.saveBooks(books);
+          persistenceService.saveBooks(this.currentBooks).catch(console.error);
         }
       } else if (type === 'ERROR') {
         this.isFetching = false;
+        this.currentError = error;
         console.error('Worker error:', error);
+        this.notifySubscribers();
       }
     };
 
@@ -51,11 +67,11 @@ class OpdsParser {
   }
 
   // Subscribe to updates. Returns unsubscribe function.
-  subscribe(callback: (books: Book[], isComplete: boolean) => void): () => void {
+  subscribe(callback: SubscriberCallback): () => void {
     this.subscribers.add(callback);
 
-    // Immediately invoke with current state so the component gets latest data right away
-    callback(this.currentBooks, this.isComplete);
+    // Immediately invoke with current state
+    callback(this.currentBooks, this.isComplete, this.currentError);
 
     return () => {
       this.subscribers.delete(callback);
@@ -65,7 +81,7 @@ class OpdsParser {
   private notifySubscribers() {
     this.subscribers.forEach(callback => {
       try {
-        callback(this.currentBooks, this.isComplete);
+        callback(this.currentBooks, this.isComplete, this.currentError);
       } catch (err) {
         console.error('Error in subscriber callback:', err);
       }
@@ -75,11 +91,14 @@ class OpdsParser {
   // Start the fetching process if not already running
   async init(): Promise<void> {
     // 1. Load from persistence first for immediate display
-    const persistedBooks = await persistenceService.getAllBooks();
-    if (persistedBooks.length > 0) {
-      this.currentBooks = persistedBooks;
-      this.isComplete = false; // We assume there might be updates
-      this.notifySubscribers();
+    try {
+      const persistedBooks = await persistenceService.getAllBooks();
+      if (persistedBooks.length > 0) {
+        this.currentBooks = persistedBooks;
+        this.notifySubscribers();
+      }
+    } catch (err) {
+      console.error('Failed to load initially from IndexedDB:', err);
     }
 
     // 2. Start Network Fetch

@@ -29,21 +29,26 @@ async function fetchAllProgressive(mainUrl: string) {
     const xml = await response.text();
     const obj = xmlParser.parse(xml);
 
-    const links = extractCatalogLinks(obj.feed?.link || []);
-    let allBooks: Book[] = [];
-    let completedCount = 0;
+    // Prioritize English and high-volume catalogs first for faster perceived loading
+    const links = extractCatalogLinks(obj.feed?.link || [])
+        .sort((a, b) => {
+            const aIsEnglish = a.title?.toLowerCase().includes('english') ? -1 : 1;
+            const bIsEnglish = b.title?.toLowerCase().includes('english') ? -1 : 1;
+            return aIsEnglish - bIsEnglish;
+        });
 
-    // Batching logic: Send books every 500ms or when we have enough
+    let completedCount = 0;
     let lastEmitTime = Date.now();
-    const BATCH_INTERVAL = 500;
+    const BATCH_INTERVAL = 300;
+    let currentBatch: Book[] = [];
 
     const processCatalog = async (initialLink: any) => {
         let currentUrl = initialLink.href;
         let pageCount = 0;
 
-        while (currentUrl && pageCount < 50) { // Safety break after 50 pages per section
+        while (currentUrl && pageCount < 20) {
             try {
-                const res = await fetchWithRetry(currentUrl);
+                const res = await fetchWithRetry(currentUrl, { timeout: 8000 });
                 const subXml = await res.text();
                 const subObj = xmlParser.parse(subXml);
 
@@ -54,17 +59,14 @@ async function fetchAllProgressive(mainUrl: string) {
                     .map((entry: any) => extractBookMetadata(entry, initialLink.title))
                     .filter(Boolean) as Book[];
 
-                allBooks.push(...books);
-                // Fix: Don't increment completedCount here, we only do it once per initial link
+                currentBatch.push(...books);
 
-                // Check for next link
                 const feedLinks = subObj.feed?.link || [];
                 const nextLink = (Array.isArray(feedLinks) ? feedLinks : [feedLinks])
                     .find((l: any) => l.rel === 'next');
 
                 currentUrl = nextLink ? nextLink.href : null;
 
-                // If relative URL, append to base
                 if (currentUrl && !currentUrl.startsWith('http')) {
                     const baseUrl = new URL(initialLink.href).origin;
                     currentUrl = new URL(currentUrl, baseUrl).toString();
@@ -73,12 +75,13 @@ async function fetchAllProgressive(mainUrl: string) {
                 pageCount++;
 
                 const now = Date.now();
-                if (now - lastEmitTime > BATCH_INTERVAL) {
+                if (now - lastEmitTime > BATCH_INTERVAL && currentBatch.length > 0) {
                     self.postMessage({
                         type: 'PROGRESS',
-                        books: allBooks,
+                        books: currentBatch,
                         isComplete: false
                     });
+                    currentBatch = [];
                     lastEmitTime = now;
                 }
             } catch (err) {
@@ -91,9 +94,10 @@ async function fetchAllProgressive(mainUrl: string) {
         if (completedCount === links.length) {
             self.postMessage({
                 type: 'PROGRESS',
-                books: allBooks,
+                books: currentBatch,
                 isComplete: true
             });
+            currentBatch = [];
         }
     };
 

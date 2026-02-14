@@ -53,20 +53,37 @@ export function BooksProvider({ children }: { children: ReactNode }) {
 
     // Subscribe to updates
     useEffect(() => {
-        const unsubscribe = opdsParser.subscribe((updatedBooks, isComplete) => {
+        const unsubscribe = opdsParser.subscribe((updatedBooks, isComplete, fetchError) => {
+            if (fetchError) {
+                setError(fetchError);
+                setLoading(false);
+                return;
+            }
+
             setBooks(updatedBooks);
 
-            // Wait until we have a decent number of books (e.g., 20) or fetching is fully complete
-            // This prevents the "empty" or "pop-in" feel if the first batch is small
-            if (updatedBooks.length >= 20 || isComplete) {
+            // Optimization: Show content as soon as we have ANY data
+            if (updatedBooks.length > 0 || isComplete) {
                 setLoading(false);
             }
 
-            // Only show "loading more" if we have dismissed the main loader but are still fetching
-            setLoadingMore(!isComplete && (updatedBooks.length >= 20 || isComplete));
+            setLoadingMore(!isComplete && updatedBooks.length > 0);
         });
 
-        return () => unsubscribe();
+        const safetyTimer = setTimeout(() => {
+            setLoading(current => {
+                if (current) {
+                    console.warn('Load timed out. Releasing loading screen.');
+                    return false;
+                }
+                return current;
+            });
+        }, 15000);
+
+        return () => {
+            unsubscribe();
+            clearTimeout(safetyTimer);
+        };
     }, []);
 
     const addBook = useCallback((book: Book) => {
