@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useDeferredValue } from 'react';
+import { motion } from 'framer-motion';
 import { Book, FilterState } from '../types/opds';
 import { BookCard } from './BookCard';
 import { searchAlgorithm } from '../services/searchAlgorithm';
@@ -119,15 +120,35 @@ export const BookGrid: React.FC<BookGridProps> = ({ books, filters, loading }) =
       </div>
 
       {/* Responsive Book Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8 flex-1">
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={{
+          hidden: { opacity: 0 },
+          visible: {
+            opacity: 1,
+            transition: {
+              staggerChildren: 0.1
+            }
+          }
+        }}
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8 flex-1"
+      >
         {paginatedBooks.map((book, index) => (
-          <BookCard
+          <motion.div
             key={book.id}
-            book={book}
-            priority={index < 8}
-          />
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: { opacity: 1, y: 0 }
+            }}
+          >
+            <BookCard
+              book={book}
+              priority={index < 8}
+            />
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
 
       {/* Pagination */}
       {totalPages > 1 && (
