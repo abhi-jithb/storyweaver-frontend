@@ -34,32 +34,47 @@ export const Hero: React.FC<HeroProps> = ({ bookCount = 0, languageCount = 0 }) 
                     </p>
 
                     {/* Stats */}
-                    <div className="flex flex-wrap justify-center gap-3 sm:gap-6 lg:gap-8 mb-12 sm:mb-16">
+                    {/* Stats */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.5, staggerChildren: 0.2 }}
+                        className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-6 lg:gap-8 mb-12 sm:mb-16 w-full max-w-3xl"
+                    >
                         {bookCount > 0 && (
-                            <div className="bg-white/95 backdrop-blur-lg rounded-xl sm:rounded-2xl px-4 sm:px-10 py-4 sm:py-6 shadow-2xl transform hover:scale-105 transition-transform duration-300 border border-white/50 min-w-[120px] sm:min-w-[180px]">
-                                <div className="text-2xl sm:text-5xl font-display font-black text-black mb-1">
+                            <motion.div
+                                whileHover={{ scale: 1.05 }}
+                                className="bg-white/95 backdrop-blur-lg rounded-xl sm:rounded-2xl px-4 sm:px-8 py-4 sm:py-6 shadow-xl border border-white/50 flex flex-col items-center justify-center text-center"
+                            >
+                                <div className="text-2xl sm:text-4xl lg:text-5xl font-display font-black text-gray-900 mb-1">
                                     {bookCount.toLocaleString()}+
                                 </div>
-                                <div className="text-xs sm:text-base text-gray-700 font-bold tracking-wide">Stories</div>
-                            </div>
+                                <div className="text-xs sm:text-sm lg:text-base text-gray-600 font-bold tracking-wide uppercase">Stories</div>
+                            </motion.div>
                         )}
 
                         {languageCount > 0 && (
-                            <div className="bg-white/95 backdrop-blur-lg rounded-xl sm:rounded-2xl px-4 sm:px-10 py-4 sm:py-6 shadow-2xl transform hover:scale-105 transition-transform duration-300 border border-white/50 min-w-[120px] sm:min-w-[180px]">
-                                <div className="text-2xl sm:text-5xl font-display font-black text-black mb-1">
+                            <motion.div
+                                whileHover={{ scale: 1.05 }}
+                                className="bg-white/95 backdrop-blur-lg rounded-xl sm:rounded-2xl px-4 sm:px-8 py-4 sm:py-6 shadow-xl border border-white/50 flex flex-col items-center justify-center text-center"
+                            >
+                                <div className="text-2xl sm:text-4xl lg:text-5xl font-display font-black text-gray-900 mb-1">
                                     {languageCount}+
                                 </div>
-                                <div className="text-xs sm:text-base text-gray-700 font-bold tracking-wide">Languages</div>
-                            </div>
+                                <div className="text-xs sm:text-sm lg:text-base text-gray-600 font-bold tracking-wide uppercase">Languages</div>
+                            </motion.div>
                         )}
 
-                        <div className="bg-white/95 backdrop-blur-lg rounded-xl sm:rounded-2xl px-4 sm:px-10 py-4 sm:py-6 shadow-2xl transform hover:scale-105 transition-transform duration-300 border border-white/50 min-w-[120px] sm:min-w-[180px]">
-                            <div className="text-2xl sm:text-5xl font-display font-black text-black mb-1">
+                        <motion.div
+                            whileHover={{ scale: 1.05 }}
+                            className="bg-white/95 backdrop-blur-lg rounded-xl sm:rounded-2xl px-4 sm:px-8 py-4 sm:py-6 shadow-xl border border-white/50 flex flex-col items-center justify-center text-center col-span-2 sm:col-span-1"
+                        >
+                            <div className="text-2xl sm:text-4xl lg:text-5xl font-display font-black text-gray-900 mb-1">
                                 100%
                             </div>
-                            <div className="text-xs sm:text-base text-gray-700 font-bold tracking-wide">Free</div>
-                        </div>
-                    </div>
+                            <div className="text-xs sm:text-sm lg:text-base text-gray-600 font-bold tracking-wide uppercase">Free</div>
+                        </motion.div>
+                    </motion.div>
 
                     {/* Scroll Indicator - Hidden on very small screens to save space if needed, or just kept small */}
                     <motion.div
