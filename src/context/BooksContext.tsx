@@ -1,6 +1,7 @@
 import React, { createContext, useContext, ReactNode, useEffect, useState, useMemo, useCallback } from 'react';
 import { Book, FilterOptions } from '../types/opds';
 import { opdsParser } from '../services/opdsParser';
+import { persistenceService } from '../utils/persistence';
 import { filterEngine } from '../services/filterEngine';
 import { STORYWEAVER_LANGUAGES_LIST } from '../utils/storyWeaverLanguages';
 
@@ -11,6 +12,9 @@ interface BooksContextType {
     error: string | null;
     refetch: () => Promise<void>;
     filterOptions: FilterOptions;
+    addBook: (book: Book) => void;
+    updateBooks: (ids: string[], updates: Partial<Book>) => void;
+    deleteBooks: (ids: string[]) => void;
 }
 
 const BooksContext = createContext<BooksContextType | undefined>(undefined);
@@ -65,14 +69,43 @@ export function BooksProvider({ children }: { children: ReactNode }) {
         return () => unsubscribe();
     }, []);
 
+    const addBook = useCallback((book: Book) => {
+        setBooks((prev) => [book, ...prev]);
+        persistenceService.saveBooks([book]);
+    }, []);
+
+    const updateBooks = useCallback((ids: string[], updates: Partial<Book>) => {
+        setBooks((prev) => {
+            const updatedBooksToPersist: Book[] = [];
+            const nextBooks = prev.map((book) => {
+                if (ids.includes(book.id)) {
+                    const updated = { ...book, ...updates };
+                    updatedBooksToPersist.push(updated);
+                    return updated;
+                }
+                return book;
+            });
+            persistenceService.saveBooks(updatedBooksToPersist);
+            return nextBooks;
+        });
+    }, []);
+
+    const deleteBooks = useCallback((ids: string[]) => {
+        setBooks((prev) => prev.filter((book) => !ids.includes(book.id)));
+        persistenceService.deleteBooks(ids);
+    }, []);
+
     const value = useMemo(() => ({
         books,
         loading,
         loadingMore,
         error,
         refetch: fetchBooks,
-        filterOptions
-    }), [books, loading, loadingMore, error, fetchBooks, filterOptions]);
+        filterOptions,
+        addBook,
+        updateBooks,
+        deleteBooks
+    }), [books, loading, loadingMore, error, fetchBooks, filterOptions, addBook, updateBooks, deleteBooks]);
 
     return (
         <BooksContext.Provider value={value}>
