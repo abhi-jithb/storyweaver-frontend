@@ -8,91 +8,37 @@ interface CacheEntry {
 }
 
 class OpdsParser {
-  private cache: Map<string, CacheEntry> = new Map();
   private worker: Worker | null = null;
   private isFetching = false;
+
+  // State for Observer Pattern
+  private subscribers: Set<(books: Book[], isComplete: boolean) => void> = new Set();
+  private currentBooks: Book[] = [];
+  private isComplete = false;
 
   constructor() { }
 
   private initWorker() {
     if (this.worker) return this.worker;
 
-    // Vite worker import syntax
     this.worker = new Worker(
       new URL('../workers/opds.worker.ts', import.meta.url),
       { type: 'module' }
     );
-    return this.worker;
-  }
 
-  async fetchAllBooks(): Promise<Book[]> {
-    const cached = this.cache.get('all_books');
-    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-      return cached.data;
-    }
-
-    const persistedBooks = await persistenceService.getAllBooks();
-    if (persistedBooks.length > 0) {
-      this.cache.set('all_books', { data: persistedBooks, timestamp: Date.now() });
-      this.refreshCacheInBackground();
-      return persistedBooks;
-    }
-
-    return new Promise((resolve, reject) => {
-      this.fetchBooksProgressive((books, isComplete) => {
-        if (isComplete) resolve(books);
-      }).catch(reject);
-    });
-  }
-
-  private async refreshCacheInBackground() {
-    if (this.isFetching) return;
-    try {
-      await this.fetchBooksProgressive();
-    } catch (err) {
-      console.warn('Background refresh failed:', err);
-    }
-  }
-
-  async fetchBooksProgressive(
-    onProgress?: (books: Book[], isComplete: boolean) => void
-  ): Promise<Book[]> {
-    // 1. Initial Load from Persistence
-    const persistedBooks = await persistenceService.getAllBooks();
-    if (persistedBooks.length > 0) {
-      if (onProgress) onProgress(persistedBooks, false);
-
-      // Still fetch from network to update
-      if (!this.isFetching) {
-        this.startWorkerFetch(onProgress);
-      }
-      return persistedBooks;
-    }
-
-    // 2. Fresh Start
-    return new Promise((resolve) => {
-      this.startWorkerFetch((books, isComplete) => {
-        if (onProgress) onProgress(books, isComplete);
-        if (isComplete) resolve(books);
-      });
-    });
-  }
-
-  private startWorkerFetch(onProgress?: (books: Book[], isComplete: boolean) => void) {
-    if (this.isFetching) return;
-    this.isFetching = true;
-
-    const worker = this.initWorker();
-
-    worker.onmessage = (e) => {
+    // Set up the persistent message handler
+    this.worker.onmessage = (e) => {
       const { type, books, isComplete, error } = e.data;
 
       if (type === 'PROGRESS') {
-        if (onProgress) onProgress(books, isComplete);
+        this.currentBooks = books;
+        this.isComplete = isComplete;
+
+        // Notify all subscribers
+        this.notifySubscribers();
 
         if (isComplete) {
           this.isFetching = false;
-          this.cache.set('all_books', { data: books, timestamp: Date.now() });
           persistenceService.saveBooks(books);
         }
       } else if (type === 'ERROR') {
@@ -101,11 +47,67 @@ class OpdsParser {
       }
     };
 
+    return this.worker;
+  }
+
+  // Subscribe to updates. Returns unsubscribe function.
+  subscribe(callback: (books: Book[], isComplete: boolean) => void): () => void {
+    this.subscribers.add(callback);
+
+    // Immediately invoke with current state so the component gets latest data right away
+    callback(this.currentBooks, this.isComplete);
+
+    return () => {
+      this.subscribers.delete(callback);
+    };
+  }
+
+  private notifySubscribers() {
+    this.subscribers.forEach(callback => {
+      try {
+        callback(this.currentBooks, this.isComplete);
+      } catch (err) {
+        console.error('Error in subscriber callback:', err);
+      }
+    });
+  }
+
+  // Start the fetching process if not already running
+  async init(): Promise<void> {
+    // 1. Load from persistence first for immediate display
+    const persistedBooks = await persistenceService.getAllBooks();
+    if (persistedBooks.length > 0) {
+      this.currentBooks = persistedBooks;
+      this.isComplete = false; // We assume there might be updates
+      this.notifySubscribers();
+    }
+
+    // 2. Start Network Fetch
+    if (!this.isFetching) {
+      this.startWorkerFetch();
+    }
+  }
+
+  private startWorkerFetch() {
+    if (this.isFetching) return;
+    this.isFetching = true;
+    this.isComplete = false;
+
+    const worker = this.initWorker();
     worker.postMessage({ type: 'FETCH_ALL', url: OPDS_MAIN_URL });
   }
 
+  // Reload data manually
+  async refresh() {
+    this.currentBooks = [];
+    this.isComplete = false;
+    this.notifySubscribers();
+    this.startWorkerFetch();
+  }
+
   clearCache(): void {
-    this.cache.clear();
+    this.currentBooks = [];
+    this.isComplete = false;
     persistenceService.clearAll();
     console.log('Cache cleared');
   }
