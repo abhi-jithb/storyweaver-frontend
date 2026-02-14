@@ -6,6 +6,7 @@ import { motion, Variants, AnimatePresence } from 'framer-motion';
 import nebulaBg from '../assets/404/nebula-bg.png';
 import magicalBook from '../assets/404/magical-book.png';
 import cosmicFox from '../assets/404/cosmic-fox.png';
+import logoImg from '../assets/logo/storyweaver-logo.png';
 
 interface Props {
     errorCode?: string;
@@ -68,6 +69,15 @@ const ErrorPage: React.FC<Props> = ({
             {/* 2. Atmospheric Overlays */}
             <div className="absolute inset-0 z-[1] bg-gradient-to-b from-[#02020a] via-transparent to-[#02020a] opacity-90" />
             <div className="absolute inset-0 z-[1] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-from)_0%,_transparent_70%)] from-primary-900/20 to-transparent" />
+
+            {/* Logo at Top */}
+            <div className="absolute top-10 left-10 z-[20] flex items-center justify-center pointer-events-none">
+                <img
+                    src={logoImg}
+                    alt="StoryWeaver"
+                    className="h-16 w-auto brightness-0 invert opacity-50 hover:opacity-100 transition-opacity"
+                />
+            </div>
 
             {/* 3. High-Quality Floating Orbs (Using Opacity + Translate only for speed) */}
             <motion.div

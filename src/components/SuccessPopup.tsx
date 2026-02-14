@@ -1,4 +1,5 @@
 import React from 'react';
+import logoImg from '../assets/logo/storyweaver-logo.png';
 
 interface SuccessPopupProps {
     isOpen: boolean;
@@ -12,7 +13,15 @@ export const SuccessPopup: React.FC<SuccessPopupProps> = ({ isOpen, onClose, tit
 
     return (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fadeIn">
-            <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full text-center animate-scaleIn transform">
+            <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full text-center animate-scaleIn transform relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-400 to-green-600 opacity-50"></div>
+
+                <img
+                    src={logoImg}
+                    alt="StoryWeaver"
+                    className="h-10 w-auto mx-auto mb-6 opacity-30 grayscale"
+                />
+
                 <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                     <svg className="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
