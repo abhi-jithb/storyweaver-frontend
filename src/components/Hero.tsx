@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import logoImg from '../assets/logo/storyweaver-logo.png';
 
 interface HeroProps {
     bookCount?: number;
@@ -18,8 +19,17 @@ export const Hero: React.FC<HeroProps> = ({ bookCount = 0, languageCount = 0 }) 
             {/* Content */}
             <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12 lg:py-20 flex flex-col items-center justify-center">
                 <div className="text-center animate-slideUp max-w-4xl">
+                    {/* Logo */}
+                    <motion.img
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        src={logoImg}
+                        alt="StoryWeaver"
+                        className="h-24 sm:h-32 lg:h-40 w-auto mx-auto mb-8 drop-shadow-2xl"
+                    />
+
                     {/* Main Headline */}
-                    <h1 className="text-3xl sm:text-5xl lg:text-7xl xl:text-8xl font-display font-black text-white mb-6 sm:mb-8 leading-tight drop-shadow-2xl">
+                    <h1 className="text-4xl sm:text-5xl lg:text-7xl xl:text-8xl font-display font-black text-white mb-6 sm:mb-8 leading-tight drop-shadow-2xl">
                         Discover Stories
                         <br />
                         <span className="inline-block mt-1 sm:mt-2 text-white drop-shadow-2xl">

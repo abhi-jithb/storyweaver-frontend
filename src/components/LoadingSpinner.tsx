@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import logoImg from '../assets/logo/storyweaver-logo.png';
 
 export const LoadingSpinner: React.FC = () => {
   const [progress, setProgress] = useState(0);
@@ -41,6 +42,11 @@ export const LoadingSpinner: React.FC = () => {
         </div>
 
         <div className="relative z-20 w-full max-w-2xl mx-auto text-center">
+          <img
+            src={logoImg}
+            alt="StoryWeaver"
+            className="h-24 sm:h-32 w-auto mx-auto mb-12 drop-shadow-2xl animate-pulse"
+          />
           <div className="relative mx-auto w-96 h-96 mb-16">
             <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 384 384">
               <circle
