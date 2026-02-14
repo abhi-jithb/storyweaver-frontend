@@ -52,11 +52,14 @@ export function BooksProvider({ children }: { children: ReactNode }) {
         const unsubscribe = opdsParser.subscribe((updatedBooks, isComplete) => {
             setBooks(updatedBooks);
 
-            if (updatedBooks.length > 0 || isComplete) {
+            // Wait until we have a decent number of books (e.g., 20) or fetching is fully complete
+            // This prevents the "empty" or "pop-in" feel if the first batch is small
+            if (updatedBooks.length >= 20 || isComplete) {
                 setLoading(false);
             }
 
-            setLoadingMore(!isComplete && updatedBooks.length > 0);
+            // Only show "loading more" if we have dismissed the main loader but are still fetching
+            setLoadingMore(!isComplete && (updatedBooks.length >= 20 || isComplete));
         });
 
         return () => unsubscribe();
