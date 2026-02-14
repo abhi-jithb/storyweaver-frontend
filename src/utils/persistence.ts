@@ -47,6 +47,20 @@ class PersistenceService {
         }
     }
 
+    async deleteBooks(ids: string[]): Promise<void> {
+        try {
+            const db = await this.getDB();
+            const tx = db.transaction(STORE_NAME, 'readwrite');
+            const store = tx.objectStore(STORE_NAME);
+            await Promise.all([
+                ...ids.map(id => store.delete(id)),
+                tx.done
+            ]);
+        } catch (error) {
+            console.error('Failed to delete books from IndexedDB:', error);
+        }
+    }
+
     async clearAll(): Promise<void> {
         try {
             const db = await this.getDB();
