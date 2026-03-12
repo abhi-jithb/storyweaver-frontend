@@ -32,8 +32,15 @@ export const BookTable: React.FC<BookTableProps> = ({ books, isBookSelected, onT
             return (
               <tr 
                 key={book.id} 
-                className={`hover:bg-primary-50/50 transition-colors cursor-pointer ${isSelected ? 'bg-primary-50' : ''}`}
+                className={`hover:bg-primary-50/50 transition-colors cursor-pointer outline-none focus:bg-primary-50/70 ${isSelected ? 'bg-primary-50' : ''}`}
                 onClick={() => onToggle(book)}
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onToggle(book);
+                  }
+                }}
               >
                 <td className="p-4 text-center">
                   <div className={`w-5 h-5 mx-auto rounded border flex items-center justify-center transition-colors ${isSelected ? 'bg-primary-500 border-primary-500 text-white' : 'border-gray-300 text-transparent'}`}>

@@ -92,10 +92,11 @@ export function BooksProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const updateBooks = useCallback((ids: string[], updates: Partial<Book>) => {
+        const idSet = new Set(ids);
         setBooks((prev) => {
             const updatedBooksToPersist: Book[] = [];
             const nextBooks = prev.map((book) => {
-                if (ids.includes(book.id)) {
+                if (idSet.has(book.id)) {
                     const updated = { ...book, ...updates };
                     updatedBooksToPersist.push(updated);
                     return updated;
@@ -108,7 +109,8 @@ export function BooksProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const deleteBooks = useCallback((ids: string[]) => {
-        setBooks((prev) => prev.filter((book) => !ids.includes(book.id)));
+        const idSet = new Set(ids);
+        setBooks((prev) => prev.filter((book) => !idSet.has(book.id)));
         persistenceService.deleteBooks(ids);
     }, []);
 

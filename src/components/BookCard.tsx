@@ -17,10 +17,16 @@ interface BookCardProps {
 }
 
 export const BookCard = React.memo<BookCardProps>(({ book, priority = false, isSelected = false, onToggle }) => {
-  const handleToggle = (e: React.MouseEvent) => {
+  const handleToggle = (e: React.MouseEvent | React.KeyboardEvent) => {
     e.preventDefault();
     e.stopPropagation();
     onToggle?.(book);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      handleToggle(e);
+    }
   };
 
   return (
@@ -49,6 +55,7 @@ export const BookCard = React.memo<BookCardProps>(({ book, priority = false, isS
         {/* Selection Checkbox - Top Right */}
         <button
           onClick={handleToggle}
+          onKeyDown={handleKeyDown}
           className={`absolute top-3 right-3 z-10 w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-300 shadow-md ${isSelected
             ? 'bg-primary-500 border-primary-500 scale-110'
             : 'bg-white/70 backdrop-blur-md border-white/50 hover:bg-white hover:scale-110'

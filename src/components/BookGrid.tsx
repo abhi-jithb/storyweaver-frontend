@@ -13,7 +13,7 @@ import { exportToCSV } from '../utils/exportUtils';
 import { useNotification } from '../context/NotificationContext';
 import { AddBookModal } from './AddBookModal';
 import { BulkEditModal } from './BulkEditModal';
-import { Trash2, Edit2, Download, Plus, XCircle, Grid, List } from 'lucide-react';
+import { Trash2, Edit2, Download, Plus, XCircle, Grid, List, CheckSquare, Square } from 'lucide-react';
 
 interface BookGridProps {
   books: Book[];
@@ -22,7 +22,7 @@ interface BookGridProps {
 }
 
 export const BookGrid: React.FC<BookGridProps> = ({ books, filters, loading }) => {
-  const { selectAll, deselectAll, selectedBooks, clearCart, isBookSelected } = useCart();
+  const { selectAll, deselectAll, selectedBooks, clearCart, isBookSelected, toggleBook } = useCart();
   const { deleteBooks, updateBooks, addBook } = useBooksContext();
   const { showToast } = useNotification();
 
@@ -65,9 +65,6 @@ export const BookGrid: React.FC<BookGridProps> = ({ books, filters, loading }) =
     addBook(book);
     showToast(`"${book.title}" added to your collection`, 'success');
   }, [addBook, showToast]);
-
-  const { toggleBook } = useCart();
-
 
   const processedBooks = useMemo(() => {
     let result = filterEngine.filterBooks(books, filters);
@@ -120,7 +117,7 @@ export const BookGrid: React.FC<BookGridProps> = ({ books, filters, loading }) =
     }
   };
 
-  // Reset to page 1 and clear selection (Option A) when filters change
+  // Reset to page 1 and clear selection when filters change
   React.useEffect(() => {
     setCurrentPage(1);
     if (selectedBooks.size > 0) {
@@ -128,7 +125,7 @@ export const BookGrid: React.FC<BookGridProps> = ({ books, filters, loading }) =
     }
   }, [filters, clearCart, selectedBooks.size]); 
 
-  // Handle page size change separately (persistence check: selection NOT cleared here)
+  // Handle page size change separately
   React.useEffect(() => {
     setCurrentPage(1);
   }, [pageSize, viewSelectedOnly]);
@@ -158,34 +155,27 @@ export const BookGrid: React.FC<BookGridProps> = ({ books, filters, loading }) =
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 bg-white/95 backdrop-blur-md rounded-[2rem] border border-gray-100 shadow-xl shadow-gray-200/50 gap-4 relative overflow-hidden transition-all duration-300">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-500 via-secondary-500 to-accent-500 opacity-50"></div>
 
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-            <div className="flex flex-col gap-2">
-              <label className="flex items-center gap-2 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  checked={allPageSelectedInView}
-                  onChange={handleSelectPage}
-                  className="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500 transition-all cursor-pointer"
-                />
-                <span className="text-sm font-bold text-gray-700 group-hover:text-primary-600 transition-colors">
-                  Select all on this page ({paginatedBooks.length})
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 border-r border-gray-200 pr-4">
+              <button
+                onClick={handleSelectPage}
+                title="Select all on this page"
+                className={`flex items-center justify-center p-3 rounded-xl transition-all ${allPageSelectedInView ? 'bg-secondary-50 text-secondary-700 border border-secondary-200' : 'bg-gray-50 text-gray-400 hover:bg-gray-100 border border-transparent'}`}
+              >
+                {allPageSelectedInView ? <CheckSquare size={18} /> : <Square size={18} />}
+              </button>
+              <button
+                onClick={handleSelectAll}
+                className={`group flex items-center gap-2 px-4 py-3 rounded-xl text-xs font-black transition-all duration-300 transform active:scale-95 ${allSelectedInView
+                  ? 'bg-secondary-50 text-secondary-700 border-2 border-secondary-200'
+                  : 'bg-primary-600 text-white shadow-lg shadow-primary-500/30 hover:shadow-primary-500/50'
+                }`}
+              >
+                <span className="tracking-widest uppercase">
+                  {allSelectedInView ? 'Deselect All' : `Select All ${displayedBooks.length}`}
                 </span>
-              </label>
-              
-              <label className="flex items-center gap-2 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  checked={allSelectedInView}
-                  onChange={handleSelectAll}
-                  className="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500 transition-all cursor-pointer"
-                />
-                <span className="text-sm font-bold text-gray-700 group-hover:text-primary-600 transition-colors">
-                  Select all {displayedBooks.length} results
-                </span>
-              </label>
+              </button>
             </div>
-
-            <div className="h-10 w-px bg-gray-200 hidden sm:block"></div>
 
             <div className="flex flex-col">
               <span className="text-xl font-black text-gray-900 leading-tight">Catalog</span>
