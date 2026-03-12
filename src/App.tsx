@@ -1,29 +1,29 @@
 import { useBooks } from './hooks/useBooks';
 import { useFilters } from './hooks/useFilters';
-
 import { FilterSidebar } from './components/FilterSidebar';
 import { BookGrid } from './components/BookGrid';
 import { LoadingSpinner } from './components/LoadingSpinner';
 import { Footer } from './components/Footer';
 import { Hero } from './components/Hero';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Navigate, useNavigate } from 'react-router-dom';
 import { useState, useMemo, useCallback } from 'react';
 import ErrorPage from './components/ErrorPage';
 import { BookDetails } from './components/BookDetails';
-// Removed unused BrowserRouter import
 import ScrollToTop from './components/ScrollToTop';
-import { CartProvider, useCart } from './context/CartContext';
+import { CartProvider } from './context/CartContext';
 import { CartFloatingButton } from './components/CartFloatingButton';
 import { CartSidebar } from './components/CartSidebar';
-import { SuccessPopup } from './components/SuccessPopup';
 import { Header } from './components/Header';
 import { BooksProvider } from './context/BooksContext';
 import { NotificationProvider } from './context/NotificationContext';
+import { ReviewSelection } from './pages/ReviewSelection';
+import { Payment } from './pages/Payment';
+import { DownloadPage } from './pages/DownloadPage';
 
 function MainAppContent() {
-  const { books, loading, error, filterOptions } = useBooks(); // Task 1 & 2: Get dynamic options
-  // ...
+  const { books, loading, error, filterOptions } = useBooks();
+  const navigate = useNavigate();
   const {
     filters,
     updateLanguage,
@@ -35,26 +35,19 @@ function MainAppContent() {
     hasActiveFilters,
   } = useFilters();
 
-  const { totalCount, clearCart } = useCart();
   const [showFilters, setShowFilters] = useState(false);
   const [showCart, setShowCart] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
 
   const handleCheckout = useCallback(() => {
-    console.log('Initiating download for selected books...');
-    // In a real app, this would trigger the actual API call
     setShowCart(false);
-    setShowSuccess(true);
-    clearCart();
-  }, [clearCart]);
+    navigate('/review-selection');
+  }, [navigate]);
 
-  // Calculate unique languages for Hero stats
   const languageCount = useMemo(() => {
     const uniqueLanguages = new Set(books.map(book => book.language).filter(Boolean));
     return uniqueLanguages.size;
   }, [books]);
 
-  // Show loading spinner only on initial load (when no books yet)
   if (loading && books.length === 0) {
     return <LoadingSpinner />;
   }
@@ -78,11 +71,8 @@ function MainAppContent() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-orange-50 to-cyan-50 animate-fadeIn">
-      {/* Hero Section */}
       <Hero bookCount={books.length} languageCount={languageCount} />
 
-      {/* Header */}
-      {/* Header */}
       <Header
         bookCount={books.length}
         onSearch={updateSearchQuery}
@@ -91,10 +81,8 @@ function MainAppContent() {
         isFilterOpen={showFilters}
       />
 
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-6 sm:py-8">
         <div className="flex flex-col md:flex-row gap-4 sm:gap-6 items-start">
-          {/* Filters - Always visible on desktop, togglable on mobile */}
           <div
             className={`
               ${showFilters ? 'fixed inset-0 bg-black/50 z-40 lg:hidden' : 'hidden'}
@@ -111,7 +99,7 @@ function MainAppContent() {
           `}>
             <div className="bg-white rounded-r-2xl lg:rounded-2xl border-r lg:border border-gray-200 shadow-2xl lg:shadow-lg h-full lg:h-auto overflow-y-auto custom-scrollbar">
               <FilterSidebar
-                filterOptions={filterOptions} // Task 2: Pass dynamic options
+                filterOptions={filterOptions}
                 filters={filters}
                 onLanguageChange={updateLanguage}
                 onLevelChange={updateLevel}
@@ -136,18 +124,11 @@ function MainAppContent() {
 
       <Footer />
 
-      {/* Cart Components */}
       <CartFloatingButton onClick={() => setShowCart(true)} />
       <CartSidebar
         isOpen={showCart}
         onClose={() => setShowCart(false)}
         onCheckout={handleCheckout}
-      />
-      <SuccessPopup
-        isOpen={showSuccess}
-        onClose={() => setShowSuccess(false)}
-        title="Request Received!"
-        message={`We've started preparing your ${totalCount} selected stories. You'll be notified as soon as the PDF downloads are ready.`}
       />
     </div>
   );
@@ -155,7 +136,7 @@ function MainAppContent() {
 
 function PageLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gray-50/30">
       <Header showSearch={false} />
       <div className="flex-1">
         {children}
@@ -171,17 +152,39 @@ function App() {
       path: "/",
       element: (
         <>
-          <ScrollToTop /> {/* Reset scroll on home */}
+          <ScrollToTop />
           <MainAppContent />
         </>
       ),
     },
     {
-      path: "/search",
+      path: "/catalog",
+      element: <Navigate to="/" />,
+    },
+    {
+      path: "/review-selection",
       element: (
         <>
           <ScrollToTop />
-          <MainAppContent />
+          <PageLayout><ReviewSelection /></PageLayout>
+        </>
+      ),
+    },
+    {
+      path: "/payment",
+      element: (
+        <>
+          <ScrollToTop />
+          <PageLayout><Payment /></PageLayout>
+        </>
+      ),
+    },
+    {
+      path: "/download",
+      element: (
+        <>
+          <ScrollToTop />
+          <PageLayout><DownloadPage /></PageLayout>
         </>
       ),
     },
@@ -218,4 +221,3 @@ function App() {
 }
 
 export default App;
-

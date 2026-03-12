@@ -199,9 +199,9 @@ export const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose, onChe
                                     onClick={onCheckout}
                                     className="w-full bg-gradient-to-r from-primary-600 to-secondary-600 text-white py-4 rounded-2xl font-black text-lg shadow-xl shadow-primary-500/20 hover:shadow-primary-500/40 hover:scale-[1.02] active:scale-98 transition-all duration-300 flex items-center justify-center gap-3"
                                 >
-                                    <span>Download Selected</span>
+                                    <span>Review & Checkout</span>
                                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16h16M4 12h16m-7-4l3 3-3 3" />
                                     </svg>
                                 </button>
                                 <p className="text-[10px] text-center text-gray-400 font-medium px-4">

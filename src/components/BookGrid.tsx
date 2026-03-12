@@ -8,12 +8,10 @@ import { filterEngine } from '../services/filterEngine';
 import { PAGE_SIZE } from '../utils/constants';
 import { useCart } from '../context/CartContext';
 import { LoadingSpinner } from './LoadingSpinner';
-import { useBooksContext } from '../context/BooksContext';
 import { exportToCSV } from '../utils/exportUtils';
 import { useNotification } from '../context/NotificationContext';
-import { AddBookModal } from './AddBookModal';
-import { BulkEditModal } from './BulkEditModal';
-import { Trash2, Edit2, Download, Plus, XCircle, Grid, List, CheckSquare, Square } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Download, XCircle, Grid, List, CheckSquare, Square, ArrowRight } from 'lucide-react';
 
 interface BookGridProps {
   books: Book[];
@@ -23,27 +21,15 @@ interface BookGridProps {
 
 export const BookGrid: React.FC<BookGridProps> = ({ books, filters, loading }) => {
   const { selectAll, deselectAll, selectedBooks, clearCart, isBookSelected, toggleBook } = useCart();
-  const { deleteBooks, updateBooks, addBook } = useBooksContext();
   const { showToast } = useNotification();
+  const navigate = useNavigate();
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZE);
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [viewSelectedOnly, setViewSelectedOnly] = useState(false);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const deferredSearch = useDeferredValue(filters.searchQuery);
-
-  const handleBulkDelete = useCallback(() => {
-    if (selectedBooks.size === 0) return;
-    const count = selectedBooks.size;
-    if (window.confirm(`Are you sure you want to delete ${count} stories?`)) {
-      deleteBooks(Array.from(selectedBooks.keys()));
-      clearCart();
-      showToast(`Successfully deleted ${count} stories`, 'success');
-    }
-  }, [selectedBooks, deleteBooks, clearCart, showToast]);
 
   const handleExport = useCallback(() => {
     if (selectedBooks.size === 0) return;
@@ -54,17 +40,6 @@ export const BookGrid: React.FC<BookGridProps> = ({ books, filters, loading }) =
       showToast('Failed to export CSV', 'error');
     }
   }, [selectedBooks, showToast]);
-
-  const handleBulkUpdate = useCallback((updates: Partial<Book>) => {
-    updateBooks(Array.from(selectedBooks.keys()), updates);
-    showToast(`Updated ${selectedBooks.size} stories successfully`, 'success');
-    clearCart();
-  }, [selectedBooks, updateBooks, clearCart, showToast]);
-
-  const handleAddBook = useCallback((book: Book) => {
-    addBook(book);
-    showToast(`"${book.title}" added to your collection`, 'success');
-  }, [addBook, showToast]);
 
   const processedBooks = useMemo(() => {
     let result = filterEngine.filterBooks(books, filters);
@@ -200,12 +175,6 @@ export const BookGrid: React.FC<BookGridProps> = ({ books, filters, loading }) =
                 <List size={18} />
               </button>
             </div>
-            <button
-              onClick={() => setIsAddModalOpen(true)}
-              className="p-3.5 bg-gray-50 text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-2xl transition-all border border-gray-100 flex items-center gap-2 font-black text-xs uppercase tracking-widest active:scale-95"
-            >
-              <Plus size={18} strokeWidth={3} /> Add New
-            </button>
 
             <AnimatePresence>
               {selectedBooks.size > 0 && (
@@ -222,22 +191,16 @@ export const BookGrid: React.FC<BookGridProps> = ({ books, filters, loading }) =
                     View Selected ({selectedBooks.size})
                   </button>
                   <button
-                    onClick={() => setIsEditModalOpen(true)}
-                    className="p-3 bg-secondary-50 text-secondary-700 hover:bg-secondary-100 rounded-xl transition-all border border-secondary-100 flex items-center gap-2 font-black text-xs uppercase tracking-widest active:scale-95"
+                    onClick={() => navigate('/review-selection')}
+                    className="p-3 bg-primary-600 text-white hover:bg-primary-700 rounded-xl transition-all shadow-lg shadow-primary-500/20 flex items-center gap-2 font-black text-xs uppercase tracking-widest active:scale-95"
                   >
-                    <Edit2 size={16} strokeWidth={3} />
+                    Checkout <ArrowRight size={16} />
                   </button>
                   <button
                     onClick={handleExport}
                     className="p-3 bg-accent-50 text-accent-700 hover:bg-accent-100 rounded-xl transition-all border border-accent-100 flex items-center gap-2 font-black text-xs uppercase tracking-widest active:scale-95"
                   >
                     <Download size={16} strokeWidth={3} />
-                  </button>
-                  <button
-                    onClick={handleBulkDelete}
-                    className="p-3 bg-red-50 text-red-700 hover:bg-red-100 rounded-xl transition-all border border-red-100 flex items-center gap-2 font-black text-xs uppercase tracking-widest active:scale-95"
-                  >
-                    <Trash2 size={16} strokeWidth={3} />
                   </button>
                   <div className="flex flex-col items-end ml-2">
                     <span className="text-lg font-black text-primary-600 leading-tight">{selectedBooks.size}</span>
@@ -347,19 +310,6 @@ export const BookGrid: React.FC<BookGridProps> = ({ books, filters, loading }) =
           </div>
         </div>
       </div>
-
-      <AddBookModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onAdd={handleAddBook}
-      />
-
-      <BulkEditModal
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        onUpdate={handleBulkUpdate}
-        selectedCount={selectedBooks.size}
-      />
     </div>
   );
 };
