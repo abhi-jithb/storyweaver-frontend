@@ -1,11 +1,6 @@
 import { Book } from '../types/opds';
-import { OPDS_MAIN_URL, CACHE_DURATION } from '../utils/constants';
+import { OPDS_MAIN_URL } from '../utils/constants';
 import { persistenceService } from '../utils/persistence';
-
-interface CacheEntry {
-  data: Book[];
-  timestamp: number;
-}
 
 type SubscriberCallback = (books: Book[], isComplete: boolean, error: string | null) => void;
 

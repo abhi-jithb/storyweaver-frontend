@@ -1,13 +1,13 @@
 import { useBooks } from './hooks/useBooks';
 import { useFilters } from './hooks/useFilters';
-import { SearchBar } from './components/SearchBar';
+
 import { FilterSidebar } from './components/FilterSidebar';
 import { BookGrid } from './components/BookGrid';
 import { LoadingSpinner } from './components/LoadingSpinner';
 import { Footer } from './components/Footer';
 import { Hero } from './components/Hero';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { createBrowserRouter, RouterProvider, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import { useState, useMemo, useCallback } from 'react';
 import ErrorPage from './components/ErrorPage';
 import { BookDetails } from './components/BookDetails';
@@ -22,10 +22,8 @@ import { BooksProvider } from './context/BooksContext';
 import { NotificationProvider } from './context/NotificationContext';
 
 function MainAppContent() {
-  const { books, loading, loadingMore, error, filterOptions } = useBooks(); // Task 1 & 2: Get dynamic options
-  const location = useLocation();
+  const { books, loading, error, filterOptions } = useBooks(); // Task 1 & 2: Get dynamic options
   // ...
-  const navigate = useNavigate();
   const {
     filters,
     updateLanguage,

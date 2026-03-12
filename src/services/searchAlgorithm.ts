@@ -6,14 +6,13 @@ class SearchAlgorithm {
     if (!query.trim()) return [];
 
     const normalizedQuery = query.toLowerCase();
-    const queryTerms = normalizedQuery.split(/\s+/).filter(Boolean);
 
     // Filter books that match at least one term in title or tags first
     const results: SearchResult[] = [];
 
     for (let i = 0; i < books.length; i++) {
       const book = books[i];
-      const score = this.calculateScore(book, normalizedQuery, queryTerms);
+      const score = this.calculateScore(book, normalizedQuery);
       if (score > 0) {
         results.push({ book, score });
       }
@@ -24,7 +23,7 @@ class SearchAlgorithm {
       .slice(0, 1000);
   }
 
-  private calculateScore(book: Book, normalizedQuery: string, queryTerms: string[]): number {
+  private calculateScore(book: Book, normalizedQuery: string): number {
     const title = book.title.toLowerCase();
 
     // Quick exit: if no match in title and no major field contains query

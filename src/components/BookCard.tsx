@@ -5,7 +5,7 @@ import { ImageWithLoader } from './ImageWithLoader';
 
 import { Book } from '../types/opds';
 
-import { truncateText, formatDate } from '../utils/formatters';
+import { truncateText } from '../utils/formatters';
 import { useCart } from '../context/CartContext';
 
 
@@ -20,7 +20,7 @@ interface BookCardProps {
 
 
 
-export const BookCard: React.FC<BookCardProps> = ({ book, score, priority = false }) => {
+export const BookCard: React.FC<BookCardProps> = ({ book, priority = false }) => {
   const { toggleBook, isBookSelected } = useCart();
   const isSelected = isBookSelected(book.id);
 

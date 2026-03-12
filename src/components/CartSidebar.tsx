@@ -1,6 +1,7 @@
 import React from 'react';
 import { useCart } from '../context/CartContext';
 import { truncateText } from '../utils/formatters';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface CartSidebarProps {
     isOpen: boolean;
@@ -8,11 +9,38 @@ interface CartSidebarProps {
     onCheckout: () => void;
 }
 
-import { motion, AnimatePresence } from 'framer-motion';
-
 export const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose, onCheckout }) => {
     const { selectedBooks, toggleBook, clearCart, totalCount } = useCart();
     const books = Array.from(selectedBooks.values());
+
+    // Calculate Dataset Summary
+    const summary = React.useMemo(() => {
+        const tempSummary = {
+            languages: {} as Record<string, number>,
+            levels: {} as Record<string, number>,
+            categories: {} as Record<string, number>,
+        };
+
+        books.forEach((book) => {
+            if (book.language) {
+                tempSummary.languages[book.language] = (tempSummary.languages[book.language] || 0) + 1;
+            }
+            if (book.level) {
+                tempSummary.levels[book.level] = (tempSummary.levels[book.level] || 0) + 1;
+            }
+            if (book.categories) {
+                book.categories.forEach((cat) => {
+                    tempSummary.categories[cat] = (tempSummary.categories[cat] || 0) + 1;
+                });
+            }
+        });
+
+        return {
+            languages: Object.entries(tempSummary.languages).sort((a, b) => b[1] - a[1]).slice(0, 3), // Top 3
+            levels: Object.entries(tempSummary.levels).sort((a, b) => b[1] - a[1]).slice(0, 3),
+            categories: Object.entries(tempSummary.categories).sort((a, b) => b[1] - a[1]).slice(0, 3),
+        };
+    }, [books]);
 
     return (
         <AnimatePresence>
@@ -70,6 +98,47 @@ export const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose, onChe
                                 </div>
                             ) : (
                                 <div className="space-y-4">
+                                    {/* Dataset Summary Panel */}
+                                    <div className="bg-primary-50 rounded-xl p-4 border border-primary-100 mb-6">
+                                        <h3 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wider">Dataset Summary</h3>
+                                        <div className="grid grid-cols-2 gap-4 text-xs">
+                                            <div>
+                                                <h4 className="font-semibold text-primary-700 mb-1">Top Languages</h4>
+                                                <ul className="space-y-1 text-gray-600">
+                                                    {summary.languages.map(([lang, count]) => (
+                                                        <li key={lang} className="flex justify-between">
+                                                            <span>{lang}</span> <span className="font-medium bg-white px-1.5 rounded">{count}</span>
+                                                        </li>
+                                                    ))}
+                                                    {summary.languages.length === 0 && <li className="text-gray-400">None</li>}
+                                                </ul>
+                                            </div>
+                                            <div>
+                                                <h4 className="font-semibold text-primary-700 mb-1">Reading Levels</h4>
+                                                <ul className="space-y-1 text-gray-600">
+                                                    {summary.levels.map(([level, count]) => (
+                                                        <li key={level} className="flex justify-between">
+                                                            <span>{level}</span> <span className="font-medium bg-white px-1.5 rounded">{count}</span>
+                                                        </li>
+                                                    ))}
+                                                    {summary.levels.length === 0 && <li className="text-gray-400">None</li>}
+                                                </ul>
+                                            </div>
+                                            <div className="col-span-2 mt-1">
+                                                <h4 className="font-semibold text-primary-700 mb-1">Top Categories</h4>
+                                                <div className="flex flex-wrap gap-1">
+                                                    {summary.categories.map(([cat, count]) => (
+                                                        <span key={cat} className="bg-white px-2 py-1 rounded border border-primary-100 text-gray-700 flex items-center gap-1">
+                                                            {cat} <span className="text-primary-500 font-bold">{count}</span>
+                                                        </span>
+                                                    ))}
+                                                    {summary.categories.length === 0 && <span className="text-gray-400">None</span>}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <h3 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wider">Selected Items</h3>
                                     <AnimatePresence>
                                         {books.map((book) => (
                                             <motion.div

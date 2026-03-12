@@ -12,8 +12,8 @@ import { exportToCSV } from '../utils/exportUtils';
 import { useNotification } from '../context/NotificationContext';
 import { AddBookModal } from './AddBookModal';
 import { BulkEditModal } from './BulkEditModal';
-import { Trash2, Edit2, Download, Plus, CheckSquare, Square, XCircle } from 'lucide-react';
-
+import { Trash2, Edit2, Download, Plus, CheckSquare, Square, XCircle, Grid, List } from 'lucide-react';
+import { BookTable } from './BookTable';
 interface BookGridProps {
   books: Book[];
   filters: FilterState;
@@ -26,6 +26,9 @@ export const BookGrid: React.FC<BookGridProps> = ({ books, filters, loading }) =
   const { showToast } = useNotification();
 
   const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(PAGE_SIZE);
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
+  const [viewSelectedOnly, setViewSelectedOnly] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
@@ -77,29 +80,49 @@ export const BookGrid: React.FC<BookGridProps> = ({ books, filters, loading }) =
 
   // ... (other hooks) ...
 
-  const allSelectedInView = useMemo(() => {
-    if (processedBooks.length === 0) return false;
-    return processedBooks.every(book => selectedBooks.has(book.id));
-  }, [processedBooks, selectedBooks]);
+  const displayedBooks = useMemo(() => {
+    if (viewSelectedOnly) {
+      return processedBooks.filter(book => selectedBooks.has(book.id));
+    }
+    return processedBooks;
+  }, [processedBooks, viewSelectedOnly, selectedBooks]);
 
-  const handleSelectAll = () => {
-    if (allSelectedInView) {
-      deselectAll(processedBooks.map(b => b.id));
+  const totalPages = Math.ceil(displayedBooks.length / pageSize);
+  const paginatedBooks = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return displayedBooks.slice(startIndex, startIndex + pageSize);
+  }, [displayedBooks, currentPage, pageSize]);
+
+  const allPageSelectedInView = useMemo(() => {
+    if (paginatedBooks.length === 0) return false;
+    return paginatedBooks.every(book => selectedBooks.has(book.id));
+  }, [paginatedBooks, selectedBooks]);
+
+  const allSelectedInView = useMemo(() => {
+    if (displayedBooks.length === 0) return false;
+    return displayedBooks.every(book => selectedBooks.has(book.id));
+  }, [displayedBooks, selectedBooks]);
+
+  const handleSelectPage = () => {
+    if (allPageSelectedInView) {
+      deselectAll(paginatedBooks.map(b => b.id));
     } else {
-      selectAll(processedBooks);
+      selectAll(paginatedBooks);
     }
   };
 
-  const totalPages = Math.ceil(processedBooks.length / PAGE_SIZE);
-  const paginatedBooks = useMemo(() => {
-    const startIndex = (currentPage - 1) * PAGE_SIZE;
-    return processedBooks.slice(startIndex, startIndex + PAGE_SIZE);
-  }, [processedBooks, currentPage]);
+  const handleSelectAll = () => {
+    if (allSelectedInView) {
+      deselectAll(displayedBooks.map(b => b.id));
+    } else {
+      selectAll(displayedBooks);
+    }
+  };
 
   // Reset to page 1 when filters change
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [filters]);
+  }, [filters, pageSize, viewSelectedOnly]);
 
   if (processedBooks.length === 0) {
     if (loading) {
@@ -121,34 +144,57 @@ export const BookGrid: React.FC<BookGridProps> = ({ books, filters, loading }) =
 
   return (
     <div className="flex-1 flex flex-col h-full w-full">
-      {/* Bulk Actions Bar */}
-      <div className="flex flex-col gap-4 mb-8">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 bg-white rounded-[2rem] border border-gray-100 shadow-xl shadow-gray-200/50 gap-4 relative overflow-hidden">
+      {/* Bulk Actions Bar - Sticky to remain visible */}
+      <div className="flex flex-col gap-4 mb-8 sticky top-24 z-40">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 bg-white/95 backdrop-blur-md rounded-[2rem] border border-gray-100 shadow-xl shadow-gray-200/50 gap-4 relative overflow-hidden transition-all duration-300">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-500 via-secondary-500 to-accent-500 opacity-50"></div>
 
-          <div className="flex items-center gap-4">
-            <button
-              onClick={handleSelectAll}
-              className={`group flex items-center gap-3 px-6 py-3.5 rounded-2xl text-sm font-black transition-all duration-300 transform active:scale-95 ${allSelectedInView
-                ? 'bg-secondary-50 text-secondary-700 border-2 border-secondary-200'
-                : 'bg-primary-600 text-white shadow-lg shadow-primary-500/30 hover:shadow-primary-500/50'
-                }`}
-            >
-              {allSelectedInView ? <CheckSquare size={20} /> : <Square size={20} />}
-              <span className="tracking-tight uppercase">
-                {allSelectedInView ? 'Deselect All' : `Select All ${processedBooks.length}`}
-              </span>
-            </button>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 border-r border-gray-200 pr-4">
+              <button
+                onClick={handleSelectPage}
+                title="Select all on this page"
+                className={`flex items-center justify-center p-3 rounded-xl transition-all ${allPageSelectedInView ? 'bg-secondary-50 text-secondary-700 border border-secondary-200' : 'bg-gray-50 text-gray-400 hover:bg-gray-100 border border-transparent'}`}
+              >
+                {allPageSelectedInView ? <CheckSquare size={18} /> : <Square size={18} />}
+              </button>
+              <button
+                onClick={handleSelectAll}
+                className={`group flex items-center gap-2 px-4 py-3 rounded-xl text-xs font-black transition-all duration-300 transform active:scale-95 ${allSelectedInView
+                  ? 'bg-secondary-50 text-secondary-700 border-2 border-secondary-200'
+                  : 'bg-primary-600 text-white shadow-lg shadow-primary-500/30 hover:shadow-primary-500/50'
+                  }`}
+              >
+                <span className="tracking-widest uppercase">
+                  {allSelectedInView ? 'Deselect All' : `Select All ${displayedBooks.length}`}
+                </span>
+              </button>
+            </div>
 
             <div className="flex flex-col">
               <span className="text-xl font-black text-gray-900 leading-tight">Catalog</span>
               <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
-                {processedBooks.length} Stories Available
+                {displayedBooks.length} Stories Found
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
+            {/* View Toggles */}
+            <div className="flex bg-gray-100 p-1 rounded-xl">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white shadow-sm text-primary-600' : 'text-gray-400 hover:text-gray-600'}`}
+              >
+                <Grid size={18} />
+              </button>
+              <button
+                onClick={() => setViewMode('table')}
+                className={`p-2 rounded-lg transition-all ${viewMode === 'table' ? 'bg-white shadow-sm text-primary-600' : 'text-gray-400 hover:text-gray-600'}`}
+              >
+                <List size={18} />
+              </button>
+            </div>
             <button
               onClick={() => setIsAddModalOpen(true)}
               className="p-3.5 bg-gray-50 text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-2xl transition-all border border-gray-100 flex items-center gap-2 font-black text-xs uppercase tracking-widest active:scale-95"
@@ -165,22 +211,28 @@ export const BookGrid: React.FC<BookGridProps> = ({ books, filters, loading }) =
                   className="flex items-center gap-3 pl-3 border-l border-gray-200"
                 >
                   <button
-                    onClick={() => setIsEditModalOpen(true)}
-                    className="p-3.5 bg-secondary-50 text-secondary-700 hover:bg-secondary-100 rounded-2xl transition-all border border-secondary-100 flex items-center gap-2 font-black text-xs uppercase tracking-widest active:scale-95"
+                    onClick={() => setViewSelectedOnly(!viewSelectedOnly)}
+                    className={`p-3 bg-gray-50 text-gray-700 hover:bg-gray-100 rounded-xl transition-all border flex items-center gap-2 font-black text-xs uppercase tracking-widest active:scale-95 ${viewSelectedOnly ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-gray-200'}`}
                   >
-                    <Edit2 size={18} strokeWidth={3} /> Edit
+                    View Selected ({selectedBooks.size})
+                  </button>
+                  <button
+                    onClick={() => setIsEditModalOpen(true)}
+                    className="p-3 bg-secondary-50 text-secondary-700 hover:bg-secondary-100 rounded-xl transition-all border border-secondary-100 flex items-center gap-2 font-black text-xs uppercase tracking-widest active:scale-95"
+                  >
+                    <Edit2 size={16} strokeWidth={3} />
                   </button>
                   <button
                     onClick={handleExport}
-                    className="p-3.5 bg-accent-50 text-accent-700 hover:bg-accent-100 rounded-2xl transition-all border border-accent-100 flex items-center gap-2 font-black text-xs uppercase tracking-widest active:scale-95"
+                    className="p-3 bg-accent-50 text-accent-700 hover:bg-accent-100 rounded-xl transition-all border border-accent-100 flex items-center gap-2 font-black text-xs uppercase tracking-widest active:scale-95"
                   >
-                    <Download size={18} strokeWidth={3} /> CSV
+                    <Download size={16} strokeWidth={3} />
                   </button>
                   <button
                     onClick={handleBulkDelete}
-                    className="p-3.5 bg-red-50 text-red-700 hover:bg-red-100 rounded-2xl transition-all border border-red-100 flex items-center gap-2 font-black text-xs uppercase tracking-widest active:scale-95"
+                    className="p-3 bg-red-50 text-red-700 hover:bg-red-100 rounded-xl transition-all border border-red-100 flex items-center gap-2 font-black text-xs uppercase tracking-widest active:scale-95"
                   >
-                    <Trash2 size={18} strokeWidth={3} />
+                    <Trash2 size={16} strokeWidth={3} />
                   </button>
                   <div className="flex flex-col items-end ml-2">
                     <span className="text-lg font-black text-primary-600 leading-tight">{selectedBooks.size}</span>
@@ -198,75 +250,89 @@ export const BookGrid: React.FC<BookGridProps> = ({ books, filters, loading }) =
         </div>
       </div>
 
-      {/* Responsive Book Grid */}
-      <motion.div
-        initial="hidden"
-        animate="visible"
-        variants={{
-          hidden: { opacity: 0 },
-          visible: {
-            opacity: 1,
-            transition: {
-              staggerChildren: 0.1
+      {/* Responsive Book Grid or Table view */}
+      {viewMode === 'grid' ? (
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: { opacity: 0 },
+            visible: {
+              opacity: 1,
+              transition: { staggerChildren: 0.1 }
             }
-          }
-        }}
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8 flex-1"
-      >
-        {paginatedBooks.map((book, index) => (
-          <motion.div
-            key={book.id}
-            variants={{
-              hidden: { opacity: 0, y: 20 },
-              visible: { opacity: 1, y: 0 }
-            }}
-          >
-            <BookCard
-              book={book}
-              priority={index < 8}
-            />
-          </motion.div>
-        ))}
-      </motion.div>
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-2 sm:gap-3 flex-wrap mt-8">
-          <button
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-            className="px-4 sm:px-5 py-2.5 sm:py-3 bg-white border-2 border-gray-300 rounded-xl disabled:opacity-40 disabled:cursor-not-allowed hover:border-primary-500 hover:shadow-md transition-all duration-200 text-sm font-semibold text-gray-700 min-h-[44px] sm:min-h-0 hover:scale-105 disabled:hover:scale-100"
-          >
-            ← Prev
-          </button>
-
-          <div className="flex gap-2">
-            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-              const pageNum = currentPage > 3 ? currentPage - 2 + i : i + 1;
-              return pageNum <= totalPages ? (
-                <button
-                  key={pageNum}
-                  onClick={() => setCurrentPage(pageNum)}
-                  className={`px-4 sm:px-4 py-2.5 sm:py-2.5 rounded-xl text-sm font-bold min-h-[44px] sm:min-h-0 min-w-[44px] sm:min-w-0 transition-all duration-300 ${currentPage === pageNum
-                    ? 'bg-gradient-to-r from-primary-500 via-secondary-500 to-accent-500 text-white shadow-lg scale-110'
-                    : 'bg-white border-2 border-gray-300 text-gray-700 hover:border-primary-400 hover:shadow-md hover:scale-105'
-                    }`}
-                >
-                  {pageNum}
-                </button>
-              ) : null;
-            })}
-          </div>
-
-          <button
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
-            className="px-4 sm:px-5 py-2.5 sm:py-3 bg-white border-2 border-gray-300 rounded-xl disabled:opacity-40 disabled:cursor-not-allowed hover:border-primary-500 hover:shadow-md transition-all duration-200 text-sm font-semibold text-gray-700 min-h-[44px] sm:min-h-0 hover:scale-105 disabled:hover:scale-100"
-          >
-            Next →
-          </button>
+          }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8 flex-1"
+        >
+          {paginatedBooks.map((book, index) => (
+            <motion.div key={book.id} variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}>
+              <BookCard book={book} priority={index < 8} />
+            </motion.div>
+          ))}
+        </motion.div>
+      ) : (
+        <div className="mb-6 sm:mb-8 flex-1">
+          <BookTable books={paginatedBooks} />
         </div>
       )}
+
+      {/* Pagination Controls */}
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-8 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+        <div className="text-sm font-semibold text-gray-500">
+          Showing <span className="text-gray-900">{displayedBooks.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}</span> to <span className="text-gray-900">{Math.min(currentPage * pageSize, displayedBooks.length)}</span> of <span className="text-primary-600 font-bold">{displayedBooks.length}</span> stories
+        </div>
+        
+        <div className="flex items-center gap-4">
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-2">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-2 bg-white border border-gray-200 rounded-lg disabled:opacity-40 hover:border-primary-500 text-sm font-semibold text-gray-700 hover:scale-105 transition-all"
+              >
+                ←
+              </button>
+
+              <div className="flex gap-1 hidden sm:flex">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  const pageNum = currentPage > 3 ? currentPage - 2 + i : i + 1;
+                  if (pageNum > totalPages) return null;
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setCurrentPage(pageNum)}
+                      className={`w-10 h-10 rounded-lg text-sm font-bold transition-all ${currentPage === pageNum ? 'bg-primary-500 text-white shadow-md' : 'bg-white border border-gray-200 text-gray-700 hover:border-primary-400'}`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 bg-white border border-gray-200 rounded-lg disabled:opacity-40 hover:border-primary-500 text-sm font-semibold text-gray-700 hover:scale-105 transition-all"
+              >
+                →
+              </button>
+            </div>
+          )}
+
+          <div className="flex items-center gap-2 border-l border-gray-200 pl-4">
+            <label className="text-xs text-gray-500 font-bold uppercase tracking-wider">Per Page</label>
+            <select 
+              value={pageSize} 
+              onChange={(e) => setPageSize(Number(e.target.value))}
+              className="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 p-2 font-semibold"
+            >
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+          </div>
+        </div>
+      </div>
       {/* Modals */}
       <AddBookModal
         isOpen={isAddModalOpen}

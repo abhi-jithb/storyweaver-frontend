@@ -2,23 +2,17 @@ import React, { useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useParams, Link } from 'react-router-dom';
 import { useBooks } from '../hooks/useBooks';
-import { LoadingSpinner } from './LoadingSpinner';
 import { ImageWithLoader } from './ImageWithLoader';
 import {
-    Home,
     ChevronRight,
     BookOpen,
-    Volume2,
     Download,
     Languages,
     Save,
     Share2,
-    MoreHorizontal,
     Plus,
     Heart,
     Book as BookIcon,
-    ShieldCheck,
-    ExternalLink
 } from 'lucide-react';
 
 export const BookDetails: React.FC = () => {
@@ -204,12 +198,5 @@ const ActionItem = ({ icon, label }: { icon: any, label: string }) => (
             {React.cloneElement(icon, { size: 24 })}
         </div>
         <span className="text-xs font-bold text-gray-500 group-hover:text-gray-900">{label}</span>
-    </button>
-);
-
-const SidebarLink = ({ icon, label, color }: { icon: any, label: string, color: string }) => (
-    <button className="flex items-center gap-3 text-primary-600 hover:text-primary-700 transition-colors font-bold text-sm text-left">
-        <span className={`${color} flex-shrink-0`}>{icon}</span>
-        {label}
     </button>
 );
