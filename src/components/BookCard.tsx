@@ -6,28 +6,21 @@ import { ImageWithLoader } from './ImageWithLoader';
 import { Book } from '../types/opds';
 
 import { truncateText } from '../utils/formatters';
-import { useCart } from '../context/CartContext';
-
 
 
 interface BookCardProps {
-
   book: Book;
-
   score?: number;
   priority?: boolean;
+  isSelected?: boolean;
+  onToggle?: (book: Book) => void;
 }
 
-
-
-export const BookCard: React.FC<BookCardProps> = ({ book, priority = false }) => {
-  const { toggleBook, isBookSelected } = useCart();
-  const isSelected = isBookSelected(book.id);
-
+export const BookCard = React.memo<BookCardProps>(({ book, priority = false, isSelected = false, onToggle }) => {
   const handleToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    toggleBook(book);
+    onToggle?.(book);
   };
 
   return (
@@ -174,5 +167,4 @@ export const BookCard: React.FC<BookCardProps> = ({ book, priority = false }) =>
     </Link>
 
   );
-
-};
+});

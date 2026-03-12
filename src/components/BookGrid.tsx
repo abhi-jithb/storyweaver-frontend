@@ -2,6 +2,7 @@ import React, { useMemo, useState, useDeferredValue, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Book, FilterState } from '../types/opds';
 import { BookCard } from './BookCard';
+import { BookTable } from './BookTable';
 import { searchAlgorithm } from '../services/searchAlgorithm';
 import { filterEngine } from '../services/filterEngine';
 import { PAGE_SIZE } from '../utils/constants';
@@ -12,8 +13,8 @@ import { exportToCSV } from '../utils/exportUtils';
 import { useNotification } from '../context/NotificationContext';
 import { AddBookModal } from './AddBookModal';
 import { BulkEditModal } from './BulkEditModal';
-import { Trash2, Edit2, Download, Plus, CheckSquare, Square, XCircle, Grid, List } from 'lucide-react';
-import { BookTable } from './BookTable';
+import { Trash2, Edit2, Download, Plus, XCircle, Grid, List } from 'lucide-react';
+
 interface BookGridProps {
   books: Book[];
   filters: FilterState;
@@ -21,7 +22,7 @@ interface BookGridProps {
 }
 
 export const BookGrid: React.FC<BookGridProps> = ({ books, filters, loading }) => {
-  const { selectAll, deselectAll, selectedBooks, clearCart } = useCart();
+  const { selectAll, deselectAll, selectedBooks, clearCart, isBookSelected } = useCart();
   const { deleteBooks, updateBooks, addBook } = useBooksContext();
   const { showToast } = useNotification();
 
@@ -65,7 +66,9 @@ export const BookGrid: React.FC<BookGridProps> = ({ books, filters, loading }) =
     showToast(`"${book.title}" added to your collection`, 'success');
   }, [addBook, showToast]);
 
-  // ... (useMemo for processedBooks remains same) ...
+  const { toggleBook } = useCart();
+
+
   const processedBooks = useMemo(() => {
     let result = filterEngine.filterBooks(books, filters);
 
@@ -77,8 +80,6 @@ export const BookGrid: React.FC<BookGridProps> = ({ books, filters, loading }) =
 
     return result;
   }, [books, filters, deferredSearch]);
-
-  // ... (other hooks) ...
 
   const displayedBooks = useMemo(() => {
     if (viewSelectedOnly) {
@@ -119,10 +120,18 @@ export const BookGrid: React.FC<BookGridProps> = ({ books, filters, loading }) =
     }
   };
 
-  // Reset to page 1 when filters change
+  // Reset to page 1 and clear selection (Option A) when filters change
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [filters, pageSize, viewSelectedOnly]);
+    if (selectedBooks.size > 0) {
+      clearCart();
+    }
+  }, [filters, clearCart, selectedBooks.size]); 
+
+  // Handle page size change separately (persistence check: selection NOT cleared here)
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [pageSize, viewSelectedOnly]);
 
   if (processedBooks.length === 0) {
     if (loading) {
@@ -144,43 +153,49 @@ export const BookGrid: React.FC<BookGridProps> = ({ books, filters, loading }) =
 
   return (
     <div className="flex-1 flex flex-col h-full w-full">
-      {/* Bulk Actions Bar - Sticky to remain visible */}
+      {/* Selection Status Bar - Sticky */}
       <div className="flex flex-col gap-4 mb-8 sticky top-24 z-40">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 bg-white/95 backdrop-blur-md rounded-[2rem] border border-gray-100 shadow-xl shadow-gray-200/50 gap-4 relative overflow-hidden transition-all duration-300">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-500 via-secondary-500 to-accent-500 opacity-50"></div>
 
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 border-r border-gray-200 pr-4">
-              <button
-                onClick={handleSelectPage}
-                title="Select all on this page"
-                className={`flex items-center justify-center p-3 rounded-xl transition-all ${allPageSelectedInView ? 'bg-secondary-50 text-secondary-700 border border-secondary-200' : 'bg-gray-50 text-gray-400 hover:bg-gray-100 border border-transparent'}`}
-              >
-                {allPageSelectedInView ? <CheckSquare size={18} /> : <Square size={18} />}
-              </button>
-              <button
-                onClick={handleSelectAll}
-                className={`group flex items-center gap-2 px-4 py-3 rounded-xl text-xs font-black transition-all duration-300 transform active:scale-95 ${allSelectedInView
-                  ? 'bg-secondary-50 text-secondary-700 border-2 border-secondary-200'
-                  : 'bg-primary-600 text-white shadow-lg shadow-primary-500/30 hover:shadow-primary-500/50'
-                  }`}
-              >
-                <span className="tracking-widest uppercase">
-                  {allSelectedInView ? 'Deselect All' : `Select All ${displayedBooks.length}`}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+            <div className="flex flex-col gap-2">
+              <label className="flex items-center gap-2 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={allPageSelectedInView}
+                  onChange={handleSelectPage}
+                  className="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500 transition-all cursor-pointer"
+                />
+                <span className="text-sm font-bold text-gray-700 group-hover:text-primary-600 transition-colors">
+                  Select all on this page ({paginatedBooks.length})
                 </span>
-              </button>
+              </label>
+              
+              <label className="flex items-center gap-2 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={allSelectedInView}
+                  onChange={handleSelectAll}
+                  className="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500 transition-all cursor-pointer"
+                />
+                <span className="text-sm font-bold text-gray-700 group-hover:text-primary-600 transition-colors">
+                  Select all {displayedBooks.length} results
+                </span>
+              </label>
             </div>
+
+            <div className="h-10 w-px bg-gray-200 hidden sm:block"></div>
 
             <div className="flex flex-col">
               <span className="text-xl font-black text-gray-900 leading-tight">Catalog</span>
               <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
-                {displayedBooks.length} Stories Found
+                {viewSelectedOnly ? `${selectedBooks.size} Selected Items` : `${processedBooks.length} Stories Found`}
               </span>
             </div>
           </div>
 
           <div className="flex items-center gap-4">
-            {/* View Toggles */}
             <div className="flex bg-gray-100 p-1 rounded-xl">
               <button
                 onClick={() => setViewMode('grid')}
@@ -250,7 +265,7 @@ export const BookGrid: React.FC<BookGridProps> = ({ books, filters, loading }) =
         </div>
       </div>
 
-      {/* Responsive Book Grid or Table view */}
+      {/* Grid or Table view */}
       {viewMode === 'grid' ? (
         <motion.div
           initial="hidden"
@@ -266,20 +281,29 @@ export const BookGrid: React.FC<BookGridProps> = ({ books, filters, loading }) =
         >
           {paginatedBooks.map((book, index) => (
             <motion.div key={book.id} variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}>
-              <BookCard book={book} priority={index < 8} />
+              <BookCard 
+                book={book} 
+                priority={index < 8} 
+                isSelected={isBookSelected(book.id)}
+                onToggle={toggleBook}
+              />
             </motion.div>
           ))}
         </motion.div>
       ) : (
         <div className="mb-6 sm:mb-8 flex-1">
-          <BookTable books={paginatedBooks} />
+          <BookTable 
+            books={paginatedBooks} 
+            isBookSelected={isBookSelected}
+            onToggle={toggleBook}
+          />
         </div>
       )}
 
       {/* Pagination Controls */}
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-8 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
         <div className="text-sm font-semibold text-gray-500">
-          Showing <span className="text-gray-900">{displayedBooks.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}</span> to <span className="text-gray-900">{Math.min(currentPage * pageSize, displayedBooks.length)}</span> of <span className="text-primary-600 font-bold">{displayedBooks.length}</span> stories
+          Showing <span className="text-gray-900">{displayedBooks.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}</span> to <span className="text-gray-900">{Math.min(currentPage * pageSize, displayedBooks.length)}</span> of <span className={`${viewSelectedOnly ? 'text-secondary-600' : 'text-primary-600'} font-bold`}>{displayedBooks.length}</span> {viewSelectedOnly ? 'selected items' : 'stories'}
         </div>
         
         <div className="flex items-center gap-4">
@@ -333,7 +357,7 @@ export const BookGrid: React.FC<BookGridProps> = ({ books, filters, loading }) =
           </div>
         </div>
       </div>
-      {/* Modals */}
+
       <AddBookModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}

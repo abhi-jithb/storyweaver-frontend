@@ -1,14 +1,14 @@
 import React from 'react';
 import { Book } from '../types/opds';
-import { useCart } from '../context/CartContext';
 import { truncateText } from '../utils/formatters';
 
 interface BookTableProps {
   books: Book[];
+  isBookSelected: (id: string) => boolean;
+  onToggle: (book: Book) => void;
 }
 
-export const BookTable: React.FC<BookTableProps> = ({ books }) => {
-  const { toggleBook, isBookSelected } = useCart();
+export const BookTable: React.FC<BookTableProps> = ({ books, isBookSelected, onToggle }) => {
 
   return (
     <div className="overflow-x-auto bg-white rounded-2xl shadow-lg border border-gray-100">
@@ -33,7 +33,7 @@ export const BookTable: React.FC<BookTableProps> = ({ books }) => {
               <tr 
                 key={book.id} 
                 className={`hover:bg-primary-50/50 transition-colors cursor-pointer ${isSelected ? 'bg-primary-50' : ''}`}
-                onClick={() => toggleBook(book)}
+                onClick={() => onToggle(book)}
               >
                 <td className="p-4 text-center">
                   <div className={`w-5 h-5 mx-auto rounded border flex items-center justify-center transition-colors ${isSelected ? 'bg-primary-500 border-primary-500 text-white' : 'border-gray-300 text-transparent'}`}>
