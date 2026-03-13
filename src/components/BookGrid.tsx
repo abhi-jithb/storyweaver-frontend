@@ -95,10 +95,8 @@ export const BookGrid: React.FC<BookGridProps> = ({ books, filters, loading }) =
   // Reset to page 1 and clear selection when filters change
   React.useEffect(() => {
     setCurrentPage(1);
-    if (selectedBooks.size > 0) {
-      clearCart();
-    }
-  }, [filters, clearCart, selectedBooks.size]); 
+    clearCart();
+  }, [filters, clearCart]); 
 
   // Handle page size change separately
   React.useEffect(() => {

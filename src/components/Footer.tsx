@@ -17,7 +17,7 @@ export const Footer: React.FC = () => (
         <div className="flex items-center justify-center gap-2 text-white/80 text-sm">
           <span>Made with</span>
           <span className="text-red-400 animate-pulse-slow text-lg">❤️</span>
-          <span>© 2025</span>
+          <span>© 2025-26</span>
         </div>
       </div>
     </div>
