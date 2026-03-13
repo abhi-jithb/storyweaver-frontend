@@ -123,8 +123,8 @@ export const BookGrid: React.FC<BookGridProps> = ({ books, filters, loading }) =
 
   return (
     <div className="flex-1 flex flex-col h-full w-full">
-      {/* Selection Status Bar - Sticky */}
-      <div className="flex flex-col gap-4 mb-8 sticky top-24 z-40">
+      {/* Selection Status Bar */}
+      <div className="flex flex-col gap-4 mb-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 bg-white/95 backdrop-blur-md rounded-[2rem] border border-gray-100 shadow-xl shadow-gray-200/50 gap-4 relative overflow-hidden transition-all duration-300">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-500 via-secondary-500 to-accent-500 opacity-50"></div>
 
