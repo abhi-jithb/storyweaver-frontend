@@ -6,11 +6,11 @@ import { LoadingSpinner } from './components/LoadingSpinner';
 import { Footer } from './components/Footer';
 import { Hero } from './components/Hero';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { createBrowserRouter, RouterProvider, Navigate, useNavigate } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Navigate, useNavigate, ScrollRestoration } from 'react-router-dom';
 import { useState, useMemo, useCallback } from 'react';
 import ErrorPage from './components/ErrorPage';
 import { BookDetails } from './components/BookDetails';
-import ScrollToTop from './components/ScrollToTop';
+// Native ScrollRestoration handles transitions between pages seamlessly
 import { CartProvider } from './context/CartContext';
 import { CartFloatingButton } from './components/CartFloatingButton';
 import { CartSidebar } from './components/CartSidebar';
@@ -152,7 +152,7 @@ function App() {
       path: "/",
       element: (
         <>
-          <ScrollToTop />
+          <ScrollRestoration />
           <MainAppContent />
         </>
       ),
@@ -165,7 +165,7 @@ function App() {
       path: "/review-selection",
       element: (
         <>
-          <ScrollToTop />
+          <ScrollRestoration />
           <PageLayout><ReviewSelection /></PageLayout>
         </>
       ),
@@ -174,7 +174,7 @@ function App() {
       path: "/payment",
       element: (
         <>
-          <ScrollToTop />
+          <ScrollRestoration />
           <PageLayout><Payment /></PageLayout>
         </>
       ),
@@ -183,7 +183,7 @@ function App() {
       path: "/download",
       element: (
         <>
-          <ScrollToTop />
+          <ScrollRestoration />
           <PageLayout><DownloadPage /></PageLayout>
         </>
       ),
@@ -192,7 +192,7 @@ function App() {
       path: "/book/:bookId",
       element: (
         <>
-          <ScrollToTop />
+          <ScrollRestoration />
           <PageLayout><BookDetails /></PageLayout>
         </>
       ),

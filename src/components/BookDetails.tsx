@@ -19,9 +19,7 @@ export const BookDetails: React.FC = () => {
     const { bookId } = useParams<{ bookId: string }>();
     const { books, loading } = useBooks();
 
-    useEffect(() => {
-        window.scrollTo(0, 0);
-    }, [bookId]);
+    // Scroll to top on mount is now handled by ScrollRestoration in App.tsx
 
     const book = useMemo(() => books.find((b) => b.id === bookId), [books, bookId]);
 
