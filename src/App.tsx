@@ -54,8 +54,8 @@ function MainAppContent() {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-red-50 to-red-100">
-        <div className="text-center max-w-md bg-white rounded-3xl shadow-2xl p-8 animate-scaleIn">
+      <div className="relative min-h-[60vh] lg:min-h-screen w-full flex flex-col items-center justify-center bg-gradient-to-br from-primary-600 via-secondary-600 to-accent-600 text-white overflow-hidden">
+        <div className="text-center max-w-md bg-white rounded-3xl shadow-2xl p-8">
           <h2 className="text-4xl font-display font-bold text-red-600 mb-4">Error</h2>
           <p className="text-gray-600 mb-6">{error}</p>
           <button
@@ -70,7 +70,7 @@ function MainAppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-orange-50 to-cyan-50 animate-fadeIn">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-orange-50 to-cyan-50">
       <Hero bookCount={books.length} languageCount={languageCount} />
 
       <Header
@@ -199,11 +199,21 @@ function App() {
     },
     {
       path: "/404",
-      element: <ErrorPage />,
+      element: (
+        <>
+          <ScrollRestoration />
+          <ErrorPage />
+        </>
+      ),
     },
     {
       path: "*",
-      element: <Navigate to="/404" />,
+      element: (
+        <>
+          <ScrollRestoration />
+          <ErrorPage />
+        </>
+      ),
     },
   ]);
 

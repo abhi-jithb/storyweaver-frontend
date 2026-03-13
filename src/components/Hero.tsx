@@ -8,7 +8,7 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ bookCount = 0, languageCount = 0 }) => {
     return (
-        <div className="relative min-h-[60vh] lg:min-h-screen w-full flex flex-col items-center justify-center bg-gradient-to-br from-primary-600 via-secondary-600 to-accent-600 animate-fadeIn text-white overflow-hidden">
+        <div className="relative min-h-[60vh] lg:min-h-screen w-full flex flex-col items-center justify-center bg-gradient-to-br from-primary-600 via-secondary-600 to-accent-600 text-white overflow-hidden">
             {/* Animated Background Pattern */}
             <div className="absolute inset-0 opacity-20 pointer-events-none">
                 <div className="absolute top-10 left-10 w-48 h-48 sm:w-72 sm:h-72 bg-white rounded-full mix-blend-multiply filter blur-3xl animate-float"></div>

@@ -68,16 +68,15 @@ export const BookDetails: React.FC = () => {
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.4 }}
                     className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start"
                 >
 
                     {/* Left: Book Cover & Quick Stats */}
                     <div className="lg:col-span-4 flex flex-col items-center lg:items-start gap-6 w-full max-w-sm mx-auto lg:max-w-none">
-                        <motion.div
-                            layoutId={`book-cover-${book.id}`}
+                        <div
                             className="w-full bg-white border border-gray-100 rounded-2xl shadow-2xl overflow-hidden group relative"
                         >
                             <div className="aspect-[3/4] relative overflow-hidden">
@@ -97,11 +96,11 @@ export const BookDetails: React.FC = () => {
                                 </span>
                                 {book.level && (
                                     <span className="bg-black/80 backdrop-blur-md text-white px-3 py-1 rounded-lg text-xs font-bold shadow-lg">
-                                        Level {book.level}
+                                        {book.level}
                                     </span>
                                 )}
                             </div>
-                        </motion.div>
+                        </div>
 
                         <div className="flex w-full justify-between px-4 text-gray-500 font-bold text-sm">
                             <span className="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-full"><Heart size={18} className="text-red-500 fill-red-500" /> {stats.likes}</span>
