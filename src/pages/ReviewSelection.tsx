@@ -175,7 +175,7 @@ export const ReviewSelection: React.FC = () => {
 
           {/* Sidebar Summary */}
           <div className="space-y-6">
-            <div className="bg-white rounded-3xl shadow-xl shadow-primary-500/5 border border-gray-100 p-6 sticky top-24">
+            <div className="bg-white rounded-3xl shadow-xl shadow-primary-500/5 border border-gray-100 p-6">
               <h2 className="text-xl font-black text-gray-900 mb-6">Selection Summary</h2>
               
               <div className="space-y-6 mb-8">
