@@ -71,5 +71,5 @@ The application follows a structured, conversion-optimized flow:
 ---
 
 <div align="center">
-  <sub>Made with ❤️ for StoryWeaver by <a href="https://github.com/abhi-jithb">Abhi Jith B</a></sub>
+  <sub>Made with ❤️ for StoryWeaver by <a href="https://github.com/abhi-jithb">Abhijith B</a>&<a href="https://github.com/rsreehari">R Sreehari</a></sub>
 </div>
