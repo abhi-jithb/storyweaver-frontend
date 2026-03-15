@@ -6,11 +6,11 @@ import { LoadingSpinner } from './components/LoadingSpinner';
 import { Footer } from './components/Footer';
 import { Hero } from './components/Hero';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { createBrowserRouter, RouterProvider, Navigate, useNavigate } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Navigate, useNavigate, ScrollRestoration } from 'react-router-dom';
 import { useState, useMemo, useCallback } from 'react';
 import ErrorPage from './components/ErrorPage';
 import { BookDetails } from './components/BookDetails';
-import ScrollToTop from './components/ScrollToTop';
+// Native ScrollRestoration handles transitions between pages seamlessly
 import { CartProvider } from './context/CartContext';
 import { CartFloatingButton } from './components/CartFloatingButton';
 import { CartSidebar } from './components/CartSidebar';
@@ -54,8 +54,8 @@ function MainAppContent() {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-red-50 to-red-100">
-        <div className="text-center max-w-md bg-white rounded-3xl shadow-2xl p-8 animate-scaleIn">
+      <div className="relative min-h-[60vh] lg:min-h-screen w-full flex flex-col items-center justify-center bg-gradient-to-br from-primary-600 via-secondary-600 to-accent-600 text-white overflow-hidden">
+        <div className="text-center max-w-md bg-white rounded-3xl shadow-2xl p-8">
           <h2 className="text-4xl font-display font-bold text-red-600 mb-4">Error</h2>
           <p className="text-gray-600 mb-6">{error}</p>
           <button
@@ -70,7 +70,7 @@ function MainAppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-orange-50 to-cyan-50 animate-fadeIn">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-orange-50 to-cyan-50">
       <Hero bookCount={books.length} languageCount={languageCount} />
 
       <Header
@@ -152,7 +152,7 @@ function App() {
       path: "/",
       element: (
         <>
-          <ScrollToTop />
+          <ScrollRestoration />
           <MainAppContent />
         </>
       ),
@@ -165,7 +165,7 @@ function App() {
       path: "/review-selection",
       element: (
         <>
-          <ScrollToTop />
+          <ScrollRestoration />
           <PageLayout><ReviewSelection /></PageLayout>
         </>
       ),
@@ -174,7 +174,7 @@ function App() {
       path: "/payment",
       element: (
         <>
-          <ScrollToTop />
+          <ScrollRestoration />
           <PageLayout><Payment /></PageLayout>
         </>
       ),
@@ -183,7 +183,7 @@ function App() {
       path: "/download",
       element: (
         <>
-          <ScrollToTop />
+          <ScrollRestoration />
           <PageLayout><DownloadPage /></PageLayout>
         </>
       ),
@@ -192,18 +192,28 @@ function App() {
       path: "/book/:bookId",
       element: (
         <>
-          <ScrollToTop />
+          <ScrollRestoration />
           <PageLayout><BookDetails /></PageLayout>
         </>
       ),
     },
     {
       path: "/404",
-      element: <ErrorPage />,
+      element: (
+        <>
+          <ScrollRestoration />
+          <ErrorPage />
+        </>
+      ),
     },
     {
       path: "*",
-      element: <Navigate to="/404" />,
+      element: (
+        <>
+          <ScrollRestoration />
+          <ErrorPage />
+        </>
+      ),
     },
   ]);
 

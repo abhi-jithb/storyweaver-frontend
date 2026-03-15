@@ -52,7 +52,7 @@ const ErrorPage: React.FC<Props> = ({
     }, []);
 
     return (
-        <div className="relative min-h-screen w-full bg-[#02020a] text-white overflow-hidden font-display flex flex-col items-center justify-center antialiased">
+        <div className="relative min-h-screen w-full bg-[#02020a] text-white overflow-hidden font-display flex flex-col items-center justify-center antialiased select-none">
 
             {/* 1. Deep Space Background - Slow Pan effect */}
             <motion.div
@@ -71,11 +71,11 @@ const ErrorPage: React.FC<Props> = ({
             <div className="absolute inset-0 z-[1] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-from)_0%,_transparent_70%)] from-primary-900/20 to-transparent" />
 
             {/* Logo at Top */}
-            <div className="absolute top-10 left-10 z-[20] flex items-center justify-center pointer-events-none">
+            <div className="absolute top-6 sm:top-10 left-1/2 lg:left-10 -translate-x-1/2 lg:translate-x-0 z-[20] flex items-center justify-center pointer-events-none">
                 <img
                     src={logoImg}
                     alt="StoryWeaver"
-                    className="h-16 w-auto brightness-0 invert opacity-50 hover:opacity-100 transition-opacity"
+                    className="h-10 sm:h-16 w-auto brightness-0 invert opacity-50 hover:opacity-100 transition-opacity"
                 />
             </div>
 
@@ -96,12 +96,12 @@ const ErrorPage: React.FC<Props> = ({
                         variants={containerVariants}
                         initial="hidden"
                         animate="visible"
-                        className="relative z-10 w-full max-w-7xl px-4 flex flex-col items-center justify-center gap-12 lg:gap-20 lg:flex-row"
+                        className="relative z-10 w-full max-w-7xl px-4 flex flex-col items-center justify-center gap-10 lg:gap-20 lg:flex-row pt-28 sm:pt-32 lg:pt-0"
                     >
                         {/* LEFT: MAGICAL BOOK */}
                         <motion.div
                             variants={{ hidden: { opacity: 0, x: -50 }, visible: { opacity: 1, x: 0 } }}
-                            className="relative w-1/2 sm:w-1/3 lg:w-1/4 order-2 lg:order-1"
+                            className="relative w-3/5 sm:w-1/3 lg:w-1/4 order-2 lg:order-1 mt-8 lg:mt-0 flex items-center justify-center mx-auto"
                         >
                             {/* Static Background Glow (No Lag) */}
                             <div className="absolute inset-0 bg-primary-500/20 blur-[60px] rounded-full scale-75" />
@@ -125,8 +125,8 @@ const ErrorPage: React.FC<Props> = ({
                         </motion.div>
 
                         {/* CENTER: CONTENT */}
-                        <div className="flex flex-col items-center text-center space-y-8 max-w-3xl order-1 lg:order-2">
-                            <div className="flex gap-4 sm:gap-6 justify-center">
+                        <div className="flex flex-col items-center text-center space-y-6 sm:space-y-8 max-w-3xl order-1 lg:order-2">
+                            <div className="flex gap-1 sm:gap-6 justify-center">
                                 {errorCode.split('').map((digit, idx) => (
                                     <motion.span
                                         key={idx}
@@ -134,30 +134,30 @@ const ErrorPage: React.FC<Props> = ({
                                         whileHover="hover"
                                         animate={{ y: [0, -15, 0] }}
                                         transition={{ y: { duration: 4, repeat: Infinity, ease: "easeInOut", delay: idx * 0.2 } }}
-                                        className="text-8xl sm:text-9xl md:text-[14rem] font-black leading-none bg-gradient-to-b from-white via-white to-primary-500 bg-clip-text text-transparent select-none drop-shadow-2xl"
+                                        className="text-6xl sm:text-9xl md:text-[14rem] font-black leading-none bg-gradient-to-b from-white via-white to-primary-500 bg-clip-text text-transparent select-none drop-shadow-2xl"
                                     >
                                         {digit}
                                     </motion.span>
                                 ))}
                             </div>
 
-                            <motion.div variants={digitVariants} className="space-y-4 px-6">
-                                <h2 className="text-3xl sm:text-6xl font-bold text-white tracking-tight drop-shadow-md">
+                            <motion.div variants={digitVariants} className="space-y-3 px-4">
+                                <h2 className="text-xl sm:text-6xl font-bold text-white tracking-tight drop-shadow-md">
                                     {title}
                                 </h2>
-                                <p className="text-gray-400 text-lg sm:text-2xl max-w-xl mx-auto font-medium">
+                                <p className="text-gray-400 text-sm sm:text-2xl max-w-xl mx-auto font-medium">
                                     {description}
                                 </p>
                             </motion.div>
 
-                            <motion.div variants={digitVariants}>
+                            <motion.div variants={digitVariants} className="w-full px-6">
                                 <Link
                                     to="/"
-                                    className="group relative inline-flex items-center gap-4 px-12 py-6 rounded-2xl bg-gradient-to-r from-primary-600 to-secondary-600 text-white font-black text-xl shadow-[0_0_30px_rgba(217,70,239,0.3)] hover:shadow-primary-500/50 transition-all transform hover:scale-110 active:scale-95"
+                                    className="group relative inline-flex items-center justify-center gap-3 w-full sm:w-auto px-8 sm:px-12 py-4 sm:py-6 rounded-2xl bg-gradient-to-r from-primary-600 to-secondary-600 text-white font-black text-lg sm:text-xl shadow-[0_0_30px_rgba(217,70,239,0.3)] hover:shadow-primary-500/50 transition-all transform hover:scale-105 active:scale-95"
                                 >
-                                    <Home className="w-6 h-6" />
+                                    <Home className="w-5 h-5 sm:w-6 sm:h-6" />
                                     <span>{buttonText}</span>
-                                    <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+                                    <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 group-hover:translate-x-2 transition-transform" />
                                 </Link>
                             </motion.div>
                         </div>
@@ -165,7 +165,7 @@ const ErrorPage: React.FC<Props> = ({
                         {/* RIGHT: COSMIC FOX */}
                         <motion.div
                             variants={{ hidden: { opacity: 0, x: 50 }, visible: { opacity: 1, x: 0 } }}
-                            className="relative w-3/5 sm:w-2/3 lg:w-[32%] order-3"
+                            className="relative w-3/5 sm:w-2/3 lg:w-[32%] order-3 mt-8 lg:mt-0 hidden lg:flex items-center justify-center mx-auto"
                         >
                             {/* Static Background Glow (No Lag) */}
                             <div className="absolute inset-0 bg-secondary-500/20 blur-[80px] rounded-full scale-90" />

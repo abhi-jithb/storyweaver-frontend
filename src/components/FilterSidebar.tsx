@@ -148,7 +148,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   return (
     <aside className="w-full bg-white border-r border-gray-200 shadow-sm h-full lg:h-auto">
       {/* Header */}
-      <div className="flex justify-between items-center px-4 sm:px-5 pt-5 pb-4 border-b border-gray-200 bg-gradient-to-r from-primary-50 to-secondary-50 sticky top-0 z-10">
+      <div className="flex justify-between items-center px-4 sm:px-5 pt-5 pb-4 border-b border-gray-200 bg-gradient-to-r from-primary-50 to-secondary-50">
         <h2 className="text-base sm:text-lg font-black text-gray-900 flex items-center gap-2 font-display">
           <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />

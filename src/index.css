@@ -10,9 +10,7 @@
     @apply border-border;
   }
 
-  html {
-    scroll-behavior: smooth;
-  }
+  /* Global base styles */
 
   body {
     @apply antialiased;
